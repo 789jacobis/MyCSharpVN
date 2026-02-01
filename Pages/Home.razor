@@ -1,7 +1,55 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<div class="vn-container" @onclick="NextLine" style="cursor:pointer; height: 100vh; background: #1a1a1a; color: white; display: flex; flex-direction: column; justify-content: flex-end; user-select: none;">
 
-<h1>Hello, world!</h1>
+    <div style="flex-grow: 1; display: flex; justify-content: center; align-items: center;">
+        <p style="color: #444;">[ 背景圖片預留區 ]</p>
+    </div>
 
-Welcome to your new app.
+    <div class="dialogue-box" style="border: 3px solid #00ffcc; margin: 20px; padding: 25px; background: rgba(0,0,0,0.85); min-height: 120px; border-radius: 10px; box-shadow: 0 0 15px #00ffcc;">
+        <div style="color: #00ffcc; font-weight: bold; font-size: 1.2rem; margin-bottom: 10px;">
+            @currentLine.CharacterName
+        </div>
+        <div style="font-size: 1.4rem; line-height: 1.6;">
+            @currentLine.Text
+        </div>
+        <div style="text-align: right; font-size: 0.8rem; color: #666; margin-top: 10px;">
+            ▼ 點擊畫面繼續
+        </div>
+    </div>
+</div>
+
+@code {
+    // 定義每一行對話的資料結構
+    public class DialogueLine
+    {
+        public string CharacterName { get; set; }
+        public string Text { get; set; }
+    }
+
+    private int index = 0;
+
+    // 您可以將您的科幻小說草稿放進這個清單
+    private List<DialogueLine> script = new List<DialogueLine>
+    {
+        new DialogueLine { CharacterName = "系統", Text = "正在連線至 GitHub 伺服器..." },
+        new DialogueLine { CharacterName = "主角", Text = "我成功了... 我真的用 C# 做出網頁遊戲了！" },
+        new DialogueLine { CharacterName = "神秘人", Text = "別高興得太早，真正的挑戰才剛開始。" },
+        new DialogueLine { CharacterName = "系統", Text = "這是一個專門為台灣開發者設計的視覺小說引擎原型。" }
+    };
+
+    private DialogueLine currentLine => script[index];
+
+    private void NextLine()
+    {
+        if (index < script.Count - 1)
+        {
+            index++;
+        }
+        else
+        {
+            // 如果劇本結束，重新開始（或者您可以設計跳轉到結算畫面）
+            index = 0;
+        }
+    }
+}
