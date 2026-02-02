@@ -3,11 +3,12 @@
 @using System.Text.Json
 @inject IJSRuntime JSRuntime
 
-@* 視覺小說主控畫布 - .NET 10 兼容版
-   整合功能：
-   1. 12x2 縮圖存檔系統 (仿夏色四葉草)
-   2. 智慧型快速存、讀檔邏輯
-   3. 遊戲設定 (文字速度、自動播放)
+@* 視覺小說主控畫布 - 穩定版 (修復存檔崩潰)
+   更新內容：
+   1. 新增 tempThumbnail 變數，用於暫存選單開啟前的遊戲畫面。
+   2. OpenSaveLoadInGame 改為先截圖、再切換頁面。
+   3. ExecuteSave 加入防呆機制，根據當前狀態決定使用即時截圖還是暫存圖。
+   4. 全面加上 try-catch，防止 JavaScript 錯誤導致遊戲重啟 (Reload Bar)。
 *@
 
 <div class="vn-container" @onclick="HandleGlobalClick" style="height: 100vh; background: #0a0a0a; color: white; user-select: none; position: relative; overflow: hidden; font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;">
@@ -183,6 +184,7 @@
     private int textSpeed = 40;
     private int index = 0;
     private string displayedText = "";
+    private string tempThumbnail = ""; // 暫存縮圖變數
     private bool isTyping = false;
     private CancellationTokenSource? cts;
     private Dictionary<string, SaveData> cachedSaves = new();
@@ -209,6 +211,16 @@
 
     private async Task OpenSaveLoadInGame(bool saving, bool viewingQuick)
     {
+        // 修正：在切換畫面「前」先截圖，避免切換後找不到遊戲畫面導致當機
+        if (currentState == GameMode.Playing)
+        {
+            try
+            {
+                tempThumbnail = await JSRuntime.InvokeAsync<string>("captureThumbnail", ".capture-target");
+            }
+            catch { tempThumbnail = ""; }
+        }
+
         previousState = currentState;
         isSaveMode = saving;
         isViewingQuickSave = viewingQuick;
@@ -227,10 +239,33 @@
 
     private async Task ExecuteSave(string storageKey)
     {
-        string thumb = await JSRuntime.InvokeAsync<string>("captureThumbnail", ".capture-target");
-        var data = new SaveData { CurrentIndex = index, SaveTime = DateTime.Now, Thumbnail = thumb };
-        await JSRuntime.InvokeVoidAsync("localStorage.setItem", storageKey, JsonSerializer.Serialize(data));
-        await RefreshSaveCache();
+        string thumb = "";
+
+        // 判斷：如果是 Q.Save (在遊戲中)，就直接截圖
+        if (currentState == GameMode.Playing)
+        {
+            try
+            {
+                thumb = await JSRuntime.InvokeAsync<string>("captureThumbnail", ".capture-target");
+            }
+            catch { }
+        }
+        else
+        {
+            // 如果是在選單中，就用剛剛存的那張
+            thumb = tempThumbnail;
+        }
+
+        try
+        {
+            var data = new SaveData { CurrentIndex = index, SaveTime = DateTime.Now, Thumbnail = thumb };
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", storageKey, JsonSerializer.Serialize(data));
+            await RefreshSaveCache();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Save failed: {ex.Message}");
+        }
     }
 
     private async Task ExecuteLoad(string cacheKey)
@@ -247,7 +282,7 @@
     private async Task PerformQuickSave()
     {
         await RefreshSaveCache();
-        int slot = 1;
+        int slot = 1; // 簡化版：先存到 1
         await ExecuteSave($"MyVN_Quick_{slot}");
     }
 
