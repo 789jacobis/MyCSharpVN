@@ -27,19 +27,38 @@ jobs:
       - name: Publish app
         run: dotnet publish -c Release -o release
 
-      - name: Create Entry Point Aliases
-        # 這是最穩定的做法：不刪除原始指紋檔，而是建立 index.html 需要的「替身」
+      - name: Precise Fingerprint Surgery
+        # 這是專為 .NET 10 設計的手術指令
         run: |
           cd release/wwwroot/_framework
-          # 建立 blazor.webassembly.js 的替身
-          WASM_JS=$(ls blazor.webassembly.*.js | grep -v "\.gz$" | grep -v "\.br$" | head -n 1)
-          if [ ! -z "$WASM_JS" ]; then cp "$WASM_JS" blazor.webassembly.js; fi
           
-          # 建立 blazor.boot.json 的替身 (自動尋找任何 .boot.json 結尾的檔案)
+          # 1. 自動尋找地圖檔 (不管是 blazor.boot.json 還是專案名.boot.json)
           BOOT_JSON=$(find . -name "*.boot.json" | head -n 1)
-          if [ ! -z "$BOOT_JSON" ]; then cp "$BOOT_JSON" blazor.boot.json; fi
+          echo "Found boot config: $BOOT_JSON"
+
+          # 2. 移除地圖檔中所有檔案的指紋紀錄
+          # 將像 "dotnet.j8g2lu7hu6.js" 替換成 "dotnet.js"
+          sed -i -E 's/([^"]+)\.[a-z0-9]{10}\.(js|wasm|dat)/\1.\2/g' "$BOOT_JSON"
           
-          echo "Aliases created for $WASM_JS and $BOOT_JSON"
+          # 3. 實際對實體檔案進行改名
+          for f in *.*.js *.*.wasm *.*.dat; do
+            if [[ $f =~ ^(.+)\.[a-z0-9]{10}\.(js|wasm|dat)$ ]]; then
+              newname="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+              echo "Renaming $f to $newname"
+              mv "$f" "$newname"
+            fi
+          done
+
+          # 4. 建立 index.html 需要的入口替身
+          WASM_JS=$(ls blazor.webassembly*.js | head -n 1)
+          cp "$WASM_JS" blazor.webassembly.js || true
+
+      - name: Disable Integrity Checks
+        # 因為我們改了檔案，必須關閉校驗功能，否則瀏覽器會拒絕執行
+        run: |
+          BOOT_JSON=$(find release/wwwroot/_framework -name "*.boot.json" | head -n 1)
+          sed -i 's/"cacheBootResources": true/"cacheBootResources": false/g' "$BOOT_JSON"
+          sed -i 's/"integrity": "sha256-[^"]*"//g' "$BOOT_JSON"
 
       - name: Force Add .nojekyll
         run: touch release/wwwroot/.nojekyll
