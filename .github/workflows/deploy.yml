@@ -21,25 +21,26 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          # 配合您的專案設定，使用 .NET 10
-          dotnet-version: '10.0.x' 
+          # 針對您專案的 .NET 10.0 設定
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
 
       - name: Publish app
-        # 請確認您的專案檔名是否為 MyVisualNovel.csproj
-        run: dotnet publish MyVisualNovel.csproj -c Release -o release
+        # 機器人會尋找資料夾內的 .csproj 並發布到 release 目錄
+        run: dotnet publish -c Release -o release
 
       - name: Fix Service Worker Integrity
         run: |
-          # 解決 Blazor PWA 在 GitHub Pages 上的 SHA256 驗證問題
-          sed -i 's/sha256-[^"]*//g' release/wwwroot/service-worker-assets.js || true
+          if [ -f "release/wwwroot/service-worker-assets.js" ]; then
+            sed -i 's/sha256-[^"]*//g' release/wwwroot/service-worker-assets.js || true
+          fi
 
       - name: Force Add .nojekyll
-        # 在發布後的目錄強行加入 .nojekyll，確保 GitHub 不會擋掉 _framework 資料夾
+        # 最關鍵的一步：確保 GitHub 不會忽略 _framework 資料夾
         run: touch release/wwwroot/.nojekyll
 
       - name: List Files for Diagnosis (Debug)
-        # 用於檢查日誌中是否有出現 _framework 資料夾
-        run: ls -R release/wwwroot
+        run: find release -maxdepth 4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -5,20 +5,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MyVisualNovel</title>
+
     <script>
-        // 自動判斷環境：如果是 localhost 就用 /，如果是 GitHub 就用專案名稱
+        // 自動判斷環境：解決 localhost 與 GitHub 子目錄路徑衝突
         var path = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? '/'
             : '/MyCSharpVN/';
         document.write('<base href="' + path + '" />');
     </script>
+
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="MyVisualNovel.styles.css" rel="stylesheet" />
     <link href="manifest.webmanifest" rel="manifest" />
-    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
 </head>
 
 <body>
@@ -36,42 +36,35 @@
         <span class="dismiss">🗙</span>
     </div>
 
-    <!-- 1. 引入必要的外部庫 -->
+    <!-- 1. 引入截圖庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- 2. 自定義截圖腳本 (放在 Blazor 前面) -->
+    <!-- 2. 截圖並壓縮 JS 函式 -->
     <script>
         window.captureThumbnail = async (elementSelector) => {
             const element = document.querySelector(elementSelector);
             if (!element) return "";
             try {
                 const canvas = await html2canvas(element, {
-                    logging: false,
-                    useCORS: true,
-                    scale: 0.5,
-                    backgroundColor: "#000"
+                    logging: false, useCORS: true, scale: 0.5, backgroundColor: "#000"
                 });
                 const thumbCanvas = document.createElement('canvas');
-                thumbCanvas.width = 200;
-                thumbCanvas.height = 112;
+                thumbCanvas.width = 200; thumbCanvas.height = 112;
                 const ctx = thumbCanvas.getContext('2d');
                 ctx.drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
                 return thumbCanvas.toDataURL("image/jpeg", 0.5);
             } catch (e) {
-                console.error("Screenshot failed:", e);
                 return "";
             }
         };
     </script>
 
-    <!-- 3. Blazor 框架腳本 -->
+    <!-- 3. Blazor 框架 -->
     <script src="_framework/blazor.webassembly.js"></script>
 
-    <!-- 4. Service Worker (加上嚴格的錯誤檢查) -->
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js')
-                .catch(err => console.info("Service Worker registration skipped."));
+            navigator.serviceWorker.register('service-worker.js').catch(() => { });
         }
     </script>
 </body>
