@@ -21,29 +21,29 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          # 建議檢查你的 csproj。如果不是特別開發 10.0 預覽版，建議改用穩定版 '8.0.x' 或 '9.0.x'
-          dotnet-version: '8.0.x' 
+          # 配合您的專案設定，使用 .NET 10
+          dotnet-version: '10.0.x' 
 
       - name: Publish app
-        run: dotnet publish -c Release -o release
+        # 請確認您的專案檔名是否為 MyVisualNovel.csproj
+        run: dotnet publish MyVisualNovel.csproj -c Release -o release
 
       - name: Fix Service Worker Integrity
         run: |
-          # 解決 Blazor PWA 在 GitHub Pages 上的常見報錯 (SHA256 驗證問題)
+          # 解決 Blazor PWA 在 GitHub Pages 上的 SHA256 驗證問題
           sed -i 's/sha256-[^"]*//g' release/wwwroot/service-worker-assets.js || true
 
       - name: Force Add .nojekyll
-        # 雖然 wwwroot 有，但在發布過程中可能沒被正確打包，我們在發布後的資料夾強行補一個
+        # 在發布後的目錄強行加入 .nojekyll，確保 GitHub 不會擋掉 _framework 資料夾
         run: touch release/wwwroot/.nojekyll
 
-      - name: Add 404.html
-        # GitHub Pages 在找不到頁面時會找 404.html，將 index 複製一份可以防止 SPA 路由失效
-        run: cp release/wwwroot/index.html release/wwwroot/404.html
+      - name: List Files for Diagnosis (Debug)
+        # 用於檢查日誌中是否有出現 _framework 資料夾
+        run: ls -R release/wwwroot
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # 確保路徑指向包含 _framework 的那個 wwwroot
           path: release/wwwroot
 
       - name: Deploy to GitHub Pages
