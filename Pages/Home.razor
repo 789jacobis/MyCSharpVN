@@ -3,11 +3,12 @@
 @using System.Text.Json
 @inject IJSRuntime JSRuntime
 
-@* 視覺小說主控畫布 (Master Canvas) 
-    整合功能：主選單、打字機對話系統、24格存檔系統 (分頁切換)、Q.Save 自動覆蓋邏輯
-    修正說明：
-    1. 增加 @onclick:stopPropagation 於關閉按鈕，防止點擊穿透導致對話自動跳行。
-    2. 優化 CloseSubPage 邏輯，確保回歸遊戲時文字保持完整顯示狀態。
+@* 視覺小說主控畫布 (Master Canvas) - 專業版
+    整合功能：
+    1. 截圖存檔 (Thumbnail Capture)
+    2. 12x2 分頁存檔系統 (仿夏色四葉草 UI)
+    3. 智慧 Q.Save (自動覆蓋最舊) / Q.Load (自動讀取最新)
+    4. 遊戲設定 (文字速度/自動播放)
 *@
 
 <div class="vn-container" @onclick="HandleGlobalClick" style="height: 100vh; background: #0a0a0a; color: white; user-select: none; position: relative; overflow: hidden; font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;">
@@ -16,12 +17,11 @@
     {
         <!-- 1. 主選單畫面 -->
         <div class="main-menu" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('images/bg_main_menu.webp'); background-size: cover; background-position: center;">
-            
             <div class="title-section" style="text-align: center; margin-bottom: 40px; animation: fadeInDown 1.5s ease-out;">
                 <h1 style="font-size: 4.5rem; color: #00ffcc; text-shadow: 0 0 25px rgba(0,255,204,0.6); letter-spacing: 12px; margin: 0;">
                     宇宙邊緣的腳本家
                 </h1>
-                <p style="font-size: 1.2rem; color: #888; letter-spacing: 4px; margin-top: 10px;">Project: MyCSharpVN</p>
+                <p style="font-size: 1.2rem; color: #888; letter-spacing: 4px; margin-top: 10px;">Version 1.0.0 - Powered by Blazor</p>
             </div>
 
             <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 15px; width: 340px;">
@@ -35,13 +35,12 @@
     }
     else if (currentState == GameMode.Playing)
     {
-        <!-- 2. 遊戲進行畫面 -->
-        <div class="game-view" style="height: 100%; display: flex; flex-direction: column; justify-content: flex-end; background: url('images/bg_spaceship_bridge.webp'); background-size: cover; background-position: center;">
-            
-            <!-- 對話顯示區 -->
+        <!-- 2. 遊戲進行畫面 (capture-target) -->
+        <div class="game-view capture-target" style="height: 100%; display: flex; flex-direction: column; justify-content: flex-end; background: url('images/bg_spaceship_bridge.webp'); background-size: cover; background-position: center;">
+
             <div class="dialogue-box" style="border: 2px solid #00ffcc; margin: 50px 35px 35px 35px; padding: 30px; background: rgba(0,0,0,0.88); min-height: 180px; border-radius: 12px; box-shadow: 0 0 30px rgba(0,255,204,0.2); backdrop-filter: blur(8px); position: relative;">
-                
-                <!-- 遊戲內選單 (HUD)：緊貼對話框右上方 -->
+
+                <!-- HUD 按鈕群組 -->
                 <div class="game-hud" style="position: absolute; top: -45px; right: 0; display: flex; gap: 5px;">
                     <button class="btn-hud" @onclick="() => OpenSaveLoadInGame(true, false)" @onclick:stopPropagation>Save</button>
                     <button class="btn-hud" @onclick="PerformQuickSave" @onclick:stopPropagation>Q.Save</button>
@@ -50,82 +49,286 @@
                     <button class="btn-hud" @onclick="BackToMenu" @onclick:stopPropagation>Menu</button>
                 </div>
 
-                <div class="char-name" style="color: #00ffcc; font-weight: bold; font-size: 1.6rem; margin-bottom: 15px; display: inline-block; border-bottom: 2px solid #00ffcc; padding-bottom: 5px;">
+                <div class="char-name" style="color: #00ffcc; font-weight: bold; font-size: 1.6rem; margin-bottom: 15px; border-bottom: 2px solid #00ffcc; padding-bottom: 5px; display: inline-block;">
                     @currentLine.CharacterName
                 </div>
-                
+
                 <div class="text-content" style="font-size: 1.5rem; line-height: 1.8; color: #e0e0e0; letter-spacing: 1.5px;">
                     @displayedText
                 </div>
-                
+
                 <div class="next-indicator" style="position: absolute; bottom: 20px; right: 25px; color: #00ffcc; font-size: 0.9rem; animation: pulse 1.5s infinite;">
-                    @(isTyping ? "▶ 跳過動畫" : "▼ 點擊繼續")
+                    @(isTyping ? "▶ Skip" : "▼ Next")
                 </div>
             </div>
         </div>
     }
     else if (currentState == GameMode.SaveLoad)
     {
-        <!-- 3. 讀取/存檔進度頁面 -->
-        <div class="sub-page" style="display: flex; flex-direction: column; height: 100%; background: #050505; padding: 40px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h2 style="color: #00ffcc; margin: 0; font-size: 2.2rem; letter-spacing: 5px;">
-                    @(isSaveMode ? (isViewingQuickSave ? "快速存檔管理" : "保存進度") : (isViewingQuickSave ? "快速讀取" : "讀取進度"))
-                </h2>
-                <!-- 修正點：加上 @onclick:stopPropagation 防止點擊穿透到遊戲層 -->
-                <button class="btn-menu" style="width: 150px; padding: 5px;" @onclick="CloseSubPage" @onclick:stopPropagation>關閉</button>
-            </div>
-            
-            <div style="flex-grow: 1;">
-                <h3 style="color: @(isViewingQuickSave ? "#00ffcc" : "#888"); border-bottom: 1px solid #333; padding-bottom: 10px;">
-                    @(isViewingQuickSave ? "QUICK SAVE SLOTS" : "NORMAL SAVE SLOTS")
-                </h3>
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px;">
-                    @for (int i = 1; i <= 12; i++)
-                    {
-                        int slot = i;
-                        <div class="save-slot @(isViewingQuickSave ? "quick" : "") @(HasData(slot, isViewingQuickSave) ? "has-data" : "")" @onclick="() => HandleSlotClick(slot, isViewingQuickSave)" @onclick:stopPropagation>
-                            <div class="slot-number">@(isViewingQuickSave ? "Q#" : "#")@slot.ToString("D2")</div>
-                            <div class="slot-info">@GetSlotLabel(slot, isViewingQuickSave)</div>
-                        </div>
-                    }
+        <!-- 3. 讀取/存檔進度頁面 (4x3 網格) -->
+        <div class="sub-page" style="display: flex; flex-direction: column; height: 100%; background: #050505; padding: 30px;">
+
+            <div style="display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 20px;">
+                <!-- 頁面標題與標籤頁籤 -->
+                <div style="display: flex; background: #111; border-radius: 30px; padding: 5px; border: 1px solid #333;">
+                    <button class="tab-item @(!isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = false" @onclick:stopPropagation>NORMAL LOAD</button>
+                    <button class="tab-item @(isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = true" @onclick:stopPropagation>QUICK LOAD</button>
                 </div>
+                <button class="btn-close" style="position: absolute; right: 0;" @onclick="CloseSubPage" @onclick:stopPropagation>✕</button>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                <button class="btn-tab @(!isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = false" @onclick:stopPropagation>Normal Save</button>
-                <button class="btn-tab @(isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = true" @onclick:stopPropagation>Quick Save</button>
+            <!-- 4x3 存檔格子區域 -->
+            <div class="save-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; flex-grow: 1; padding: 10px;">
+                @for (int i = 1; i <= 12; i++)
+                {
+                    int slot = i;
+                    var data = GetSlotData(slot, isViewingQuickSave);
+                    <div class="save-slot-card @(data != null ? "has-data" : "")" @onclick="() => HandleSlotClick(slot, isViewingQuickSave)" @onclick:stopPropagation>
+                        <div class="slot-header">
+                            <span>@(isViewingQuickSave ? "Q" : "")@slot.ToString("D3")</span>
+                            <span class="slot-date">@(data?.SaveTime.ToString("yyyy/MM/dd HH:mm:ss") ?? "EMPTY")</span>
+                        </div>
+                        <div class="slot-thumb" style="background-image: url('@(data?.Thumbnail ?? "")');">
+                            @if (data == null)
+                            {
+                                <div class="empty-label">NO DATA</div>
+                            }
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     }
-    else
+    else if (currentState == GameMode.Settings)
     {
-        <div class="sub-page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: #111;">
-            <h2 style="color: #00ffcc; margin-bottom: 30px;">@currentState 頁面開發中...</h2>
-            <button class="btn-menu" style="width: 200px;" @onclick="CloseSubPage" @onclick:stopPropagation>返回</button>
+        <!-- 4. 遊戲設定頁面 -->
+        <div class="sub-page" style="display: flex; flex-direction: column; height: 100%; background: #050505; padding: 40px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                <h2 style="color: #00ffcc; letter-spacing: 5px; margin: 0;">GAME SETTINGS</h2>
+                <button class="btn-menu" style="width: 120px; padding: 5px;" @onclick="CloseSubPage" @onclick:stopPropagation>Close</button>
+            </div>
+
+            <div class="settings-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                <!-- 文字設定 -->
+                <div class="setting-group">
+                    <h3 class="setting-title">Text Settings</h3>
+                    <div class="setting-item">
+                        <label>文字顯示速度 (毫秒/字)</label>
+                        <input type="range" min="10" max="100" @bind="textSpeed" @bind:event="oninput" />
+                        <span class="val">@textSpeed ms</span>
+                    </div>
+                    <div class="setting-item">
+                        <label>自動播放延遲 (秒)</label>
+                        <input type="range" min="1" max="10" @bind="autoDelay" @bind:event="oninput" />
+                        <span class="val">@autoDelay s</span>
+                    </div>
+                </div>
+
+                <!-- 音量設定 (目前僅為介面) -->
+                <div class="setting-group">
+                    <h3 class="setting-title">Sound Settings</h3>
+                    <div class="setting-item">
+                        <label>主音量 (Master)</label>
+                        <input type="range" min="0" max="100" />
+                    </div>
+                    <div class="setting-item">
+                        <label>背景音樂 (BGM)</label>
+                        <input type="range" min="0" max="100" />
+                    </div>
+                </div>
+            </div>
         </div>
     }
 
 </div>
 
 <style>
-    .btn-menu { background: rgba(0, 255, 204, 0.03); border: 1px solid rgba(0, 255, 204, 0.4); color: #fff; padding: 14px; font-size: 1.25rem; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px; backdrop-filter: blur(4px); text-align: center; }
-    .btn-menu:hover { background: #00ffcc; color: #000; box-shadow: 0 0 15px #00ffcc; }
-    .btn-hud { background: rgba(0, 0, 0, 0.7); border: 1px solid #00ffcc; color: #00ffcc; padding: 5px 12px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; border-radius: 4px 4px 0 0; }
-    .btn-hud:hover { background: #00ffcc; color: #000; }
-    .btn-tab { background: #111; border: 1px solid #333; color: #666; padding: 10px 20px; cursor: pointer; transition: 0.3s; }
-    .btn-tab.active { border-color: #00ffcc; color: #00ffcc; background: rgba(0, 255, 204, 0.1); }
-    .save-slot { background: #111; border: 1px solid #333; padding: 15px; cursor: pointer; transition: 0.2s; min-height: 80px; display: flex; flex-direction: column; justify-content: center; border-radius: 4px; }
-    .save-slot:hover { border-color: #eee; background: #1a1a1a; }
-    .save-slot.quick { border-color: #003322; }
-    .save-slot.quick:hover { border-color: #00ffcc; background: #001100; }
-    .save-slot.has-data { background: #1a1a1a; border-left: 4px solid #888; }
-    .save-slot.quick.has-data { border-left: 4px solid #00ffcc; }
-    .slot-number { font-size: 0.75rem; color: #555; margin-bottom: 6px; }
-    .slot-info { font-size: 0.9rem; color: #888; }
-    .save-slot.has-data .slot-info { color: #ccc; }
-    @@keyframes pulse { 0% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } 100% { opacity: 0.3; transform: translateY(0); } }
-    @@keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+    /* 基礎樣式與按鈕 */
+    .btn-menu {
+        background: rgba(0, 255, 204, 0.03);
+        border: 1px solid rgba(0, 255, 204, 0.4);
+        color: #fff;
+        padding: 14px;
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-align: center;
+    }
+
+        .btn-menu:hover {
+            background: #00ffcc;
+            color: #000;
+            box-shadow: 0 0 15px #00ffcc;
+        }
+
+    .btn-hud {
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid #00ffcc;
+        color: #00ffcc;
+        padding: 5px 12px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        border-radius: 4px 4px 0 0;
+    }
+
+        .btn-hud:hover {
+            background: #00ffcc;
+            color: #000;
+        }
+
+    .btn-close {
+        background: transparent;
+        border: 1px solid #555;
+        color: #888;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .btn-close:hover {
+            border-color: #fff;
+            color: #fff;
+            transform: rotate(90deg);
+        }
+
+    /* 頁籤樣式 */
+    .tab-item {
+        background: transparent;
+        border: none;
+        color: #666;
+        padding: 10px 25px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 0.9rem;
+        transition: 0.3s;
+        border-radius: 20px;
+    }
+
+        .tab-item.active {
+            background: #00ffcc;
+            color: #000;
+        }
+
+    /* 存檔格子卡片 */
+    .save-slot-card {
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .save-slot-card:hover {
+            border-color: #00ffcc;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,255,204,0.1);
+        }
+
+    .slot-header {
+        background: #1a1a1a;
+        padding: 5px 10px;
+        font-size: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        color: #555;
+    }
+
+    .slot-thumb {
+        aspect-ratio: 16/9;
+        background-size: cover;
+        background-position: center;
+        background-color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .empty-label {
+        color: #222;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+
+    .save-slot-card.has-data .slot-header {
+        color: #00ffcc;
+    }
+
+    .slot-date {
+        font-family: monospace;
+    }
+
+    /* 設定頁面樣式 */
+    .setting-group {
+        background: #111;
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid #222;
+    }
+
+    .setting-title {
+        font-size: 1.2rem;
+        color: #00ffcc;
+        margin-bottom: 25px;
+        border-left: 4px solid #00ffcc;
+        padding-left: 15px;
+    }
+
+    .setting-item {
+        margin-bottom: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+        .setting-item label {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .setting-item input[type="range"] {
+            accent-color: #00ffcc;
+        }
+
+        .setting-item .val {
+            font-family: monospace;
+            color: #00ffcc;
+            text-align: right;
+            font-size: 0.85rem;
+        }
+
+    @@keyframes pulse {
+        0% {
+            opacity: 0.3;
+        }
+
+        50% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0.3;
+        }
+    }
+
+    @@keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 </style>
 
 @code {
@@ -135,14 +338,21 @@
     private bool isSaveMode = false;
     private bool isViewingQuickSave = false;
 
-    public class DialogueLine {
+    // --- 遊戲設定變數 ---
+    private int textSpeed = 40; // 打字延遲
+    private int autoDelay = 3;  // 自動播放停留秒數
+
+    public class DialogueLine
+    {
         public string CharacterName { get; set; } = "";
         public string Text { get; set; } = "";
     }
 
-    public class SaveData {
+    public class SaveData
+    {
         public int CurrentIndex { get; set; }
         public DateTime SaveTime { get; set; }
+        public string Thumbnail { get; set; } = ""; // 存儲 Base64 縮圖
     }
 
     private int index = 0;
@@ -152,22 +362,19 @@
     private Dictionary<string, SaveData> cachedSaves = new();
 
     private List<DialogueLine> script = new List<DialogueLine> {
-        new DialogueLine { CharacterName = "系統", Text = "正在重新校準界面協議..." },
-        new DialogueLine { CharacterName = "主角", Text = "這才是真正的視覺小說配置。Q.Save 已經準備就緒。" },
-        new DialogueLine { CharacterName = "AI 助手", Text = "我會負責監控 12 個快速存檔槽位，自動覆蓋最舊的資料。" },
-        new DialogueLine { CharacterName = "系統", Text = "HUD 位置已修正，分頁系統上線。" },
-        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字11111。" },
-        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字22222。" },
-        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字33333。" },
-        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字44444。" },
-        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字55555。" }
+        new DialogueLine { CharacterName = "系統", Text = "正在連線至視覺小說渲染引擎..." },
+        new DialogueLine { CharacterName = "主角", Text = "這介面看起來完全不一樣了，這就是縮圖存檔的力量嗎？" },
+        new DialogueLine { CharacterName = "AI 助手", Text = "是的。我現在會透過 html2canvas 幫您擷取遊戲畫面。" },
+        new DialogueLine { CharacterName = "系統", Text = "您可以隨時在設定中調整文字速度。目前的打字間隔為：" },
+        new DialogueLine { CharacterName = "系統", Text = "這行是用來測試不同速度顯示的句子，請在設定中拉動拉桿試試看。" }
     };
 
     private DialogueLine currentLine => script.Count > index ? script[index] : new DialogueLine();
 
-    // --- 存檔/讀取邏輯 ---
+    // --- 智慧存檔/讀取邏輯 ---
 
-    private async Task OpenSaveLoadPage(bool viewingQuick) {
+    private async Task OpenSaveLoadPage(bool viewingQuick)
+    {
         previousState = currentState;
         isSaveMode = false;
         isViewingQuickSave = viewingQuick;
@@ -175,7 +382,8 @@
         SwitchState(GameMode.SaveLoad);
     }
 
-    private async Task OpenSaveLoadInGame(bool saving, bool viewingQuick) {
+    private async Task OpenSaveLoadInGame(bool saving, bool viewingQuick)
+    {
         previousState = currentState;
         isSaveMode = saving;
         isViewingQuickSave = viewingQuick;
@@ -183,133 +391,162 @@
         SwitchState(GameMode.SaveLoad);
     }
 
-    private void CloseSubPage() {
-        // 修正點：回到遊戲時，強制讓文字填滿當前劇本內容，且標記為非打字狀態
-        if (previousState == GameMode.Playing) {
+    private void CloseSubPage()
+    {
+        if (previousState == GameMode.Playing)
+        {
             displayedText = currentLine.Text;
             isTyping = false;
         }
         currentState = previousState;
     }
 
-    private async Task PerformQuickSave() {
+    private async Task PerformQuickSave()
+    {
         await RefreshSaveCache();
         int targetSlot = -1;
-        for (int i = 1; i <= 12; i++) {
-            if (!HasData(i, true)) { targetSlot = i; break; }
-        }
-        if (targetSlot == -1) {
-            DateTime oldestTime = DateTime.MaxValue;
-            for (int i = 1; i <= 12; i++) {
-                if (cachedSaves.TryGetValue($"Quick_{i}", out var data) && data.SaveTime < oldestTime) {
-                    oldestTime = data.SaveTime;
-                    targetSlot = i;
+        // 尋找空位或最舊位
+        for (int i = 1; i <= 12; i++) { if (!HasData(i, true)) { targetSlot = i; break; } }
+        if (targetSlot == -1)
+        {
+            DateTime oldest = DateTime.MaxValue;
+            for (int i = 1; i <= 12; i++)
+            {
+                if (cachedSaves.TryGetValue($"Quick_{i}", out var data) && data.SaveTime < oldest)
+                {
+                    oldest = data.SaveTime; targetSlot = i;
                 }
             }
         }
-        if (targetSlot != -1) { await ExecuteSave($"MyVN_Quick_{targetSlot}"); }
+        if (targetSlot != -1) await ExecuteSave($"MyVN_Quick_{targetSlot}");
     }
 
-    private async Task PerformQuickLoad() {
+    private async Task PerformQuickLoad()
+    {
         await RefreshSaveCache();
-        DateTime newestTime = DateTime.MinValue;
+        DateTime newest = DateTime.MinValue;
         int targetSlot = -1;
-        for (int i = 1; i <= 12; i++) {
-            if (cachedSaves.TryGetValue($"Quick_{i}", out var data) && data.SaveTime > newestTime) {
-                newestTime = data.SaveTime;
-                targetSlot = i;
+        for (int i = 1; i <= 12; i++)
+        {
+            if (cachedSaves.TryGetValue($"Quick_{i}", out var data) && data.SaveTime > newest)
+            {
+                newest = data.SaveTime; targetSlot = i;
             }
         }
-        if (targetSlot != -1) { await ExecuteLoad($"Quick_{targetSlot}"); }
-        else { await OpenSaveLoadPage(true); }
+        if (targetSlot != -1) await ExecuteLoad($"Quick_{targetSlot}");
+        else await OpenSaveLoadPage(true);
     }
 
-    private async Task ExecuteSave(string key) {
-        var data = new SaveData { CurrentIndex = index, SaveTime = DateTime.Now };
-        await JSRuntime.InvokeVoidAsync("localStorage.setItem", key, JsonSerializer.Serialize(data));
+    private async Task ExecuteSave(string storageKey)
+    {
+        // 呼叫 JS 進行縮圖擷取 (傳入遊戲主畫面容器的 Class)
+        string thumb = "";
+        try
+        {
+            thumb = await JSRuntime.InvokeAsync<string>("captureThumbnail", ".capture-target");
+        }
+        catch { }
+
+        var data = new SaveData
+        {
+            CurrentIndex = index,
+            SaveTime = DateTime.Now,
+            Thumbnail = thumb
+        };
+        await JSRuntime.InvokeVoidAsync("localStorage.setItem", storageKey, JsonSerializer.Serialize(data));
         await RefreshSaveCache();
     }
 
-    private async Task ExecuteLoad(string cacheKey) {
-        if (cachedSaves.TryGetValue(cacheKey, out var data)) {
+    private async Task ExecuteLoad(string cacheKey)
+    {
+        if (cachedSaves.TryGetValue(cacheKey, out var data))
+        {
             index = data.CurrentIndex;
-            displayedText = currentLine.Text; // 讀檔時直接顯示全文
+            displayedText = currentLine.Text;
             isTyping = false;
             currentState = GameMode.Playing;
             StateHasChanged();
         }
     }
 
-    private async Task RefreshSaveCache() {
+    private async Task RefreshSaveCache()
+    {
         cachedSaves.Clear();
-        for (int i = 1; i <= 12; i++) {
-            var normalJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", $"MyVN_Normal_{i}");
-            if (!string.IsNullOrEmpty(normalJson)) cachedSaves[$"Normal_{i}"] = JsonSerializer.Deserialize<SaveData>(normalJson)!;
-            var quickJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", $"MyVN_Quick_{i}");
-            if (!string.IsNullOrEmpty(quickJson)) cachedSaves[$"Quick_{i}"] = JsonSerializer.Deserialize<SaveData>(quickJson)!;
+        for (int i = 1; i <= 12; i++)
+        {
+            var nJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", $"MyVN_Normal_{i}");
+            if (!string.IsNullOrEmpty(nJson)) cachedSaves[$"Normal_{i}"] = JsonSerializer.Deserialize<SaveData>(nJson)!;
+            var qJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", $"MyVN_Quick_{i}");
+            if (!string.IsNullOrEmpty(qJson)) cachedSaves[$"Quick_{i}"] = JsonSerializer.Deserialize<SaveData>(qJson)!;
         }
+    }
+
+    private SaveData? GetSlotData(int slot, bool isQuick)
+    {
+        string key = $"{(isQuick ? "Quick" : "Normal")}_{slot}";
+        return cachedSaves.TryGetValue(key, out var data) ? data : null;
     }
 
     private bool HasData(int slot, bool isQuick) => cachedSaves.ContainsKey($"{(isQuick ? "Quick" : "Normal")}_{slot}");
 
-    private string GetSlotLabel(int slot, bool isQuick) {
-        string key = $"{(isQuick ? "Quick" : "Normal")}_{slot}";
-        if (cachedSaves.TryGetValue(key, out var data)) return data.SaveTime.ToString("yyyy/MM/dd HH:mm");
-        return "Empty Slot";
-    }
-
-    private async Task HandleSlotClick(int slot, bool isQuick) {
+    private async Task HandleSlotClick(int slot, bool isQuick)
+    {
         string prefix = isQuick ? "Quick" : "Normal";
-        if (isSaveMode) { await ExecuteSave($"MyVN_{prefix}_{slot}"); }
-        else { await ExecuteLoad($"{prefix}_{slot}"); }
+        if (isSaveMode) await ExecuteSave($"MyVN_{prefix}_{slot}");
+        else await ExecuteLoad($"{prefix}_{slot}");
     }
 
     // --- 遊戲邏輯 ---
 
-    private void SwitchState(GameMode nextState) {
+    private void SwitchState(GameMode nextState)
+    {
         previousState = currentState;
         currentState = nextState;
     }
-    
     private void BackToMenu() => currentState = GameMode.MainMenu;
 
-    private async Task StartNewGame() {
+    private async Task StartNewGame()
+    {
         index = 0;
         currentState = GameMode.Playing;
         await TypeCurrentLine();
     }
 
-    private async Task HandleGlobalClick() {
-        // 如果不在遊玩狀態，或者點擊到了會阻止冒泡的 UI 元素，就不執行
+    private async Task HandleGlobalClick()
+    {
         if (currentState != GameMode.Playing) return;
-        
         if (isTyping) cts?.Cancel();
-        else {
+        else
+        {
             if (index < script.Count - 1) { index++; await TypeCurrentLine(); }
             else BackToMenu();
         }
     }
 
-    private async Task TypeCurrentLine() {
+    private async Task TypeCurrentLine()
+    {
         string fullText = currentLine.Text;
         displayedText = "";
         isTyping = true;
         if (cts != null) { cts.Cancel(); cts.Dispose(); }
         cts = new CancellationTokenSource();
         var token = cts.Token;
-        try {
-            foreach (var ch in fullText) {
+        try
+        {
+            foreach (var ch in fullText)
+            {
                 if (token.IsCancellationRequested) break;
                 displayedText += ch;
                 StateHasChanged();
-                await Task.Delay(45, token);
+                await Task.Delay(textSpeed, token); // 使用動態文字速度
             }
         }
         catch (OperationCanceledException) { displayedText = fullText; }
         finally { isTyping = false; StateHasChanged(); }
     }
 
-    private async Task QuitGame() {
+    private async Task QuitGame()
+    {
         bool confirm = await JSRuntime.InvokeAsync<bool>("confirm", "確定要退出嗎？");
         if (confirm) await JSRuntime.InvokeVoidAsync("location.assign", "https://github.com/789jacobis/MyCSharpVN");
     }
