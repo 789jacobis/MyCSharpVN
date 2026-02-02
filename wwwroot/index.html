@@ -18,16 +18,17 @@
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="MyVisualNovel.styles.css" rel="stylesheet" />
-    <link href="manifest.webmanifest" rel="manifest" />
 </head>
 
 <body>
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <!-- 簡化 Loading 畫面，確保不會出錯 -->
+        <div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#000; color:#00ffcc; font-family:sans-serif;">
+            <div style="text-align:center;">
+                <div style="font-size:2rem; margin-bottom:10px;">LOADING...</div>
+                <div style="font-size:0.8rem; color:#666;">.NET 10.0 ENGINE STARTING</div>
+            </div>
+        </div>
     </div>
 
     <div id="blazor-error-ui">
@@ -36,7 +37,7 @@
         <span class="dismiss">🗙</span>
     </div>
 
-    <!-- 1. 截圖庫 -->
+    <!-- 1. 引入截圖庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
@@ -52,20 +53,14 @@
                 const ctx = thumbCanvas.getContext('2d');
                 ctx.drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
                 return thumbCanvas.toDataURL("image/jpeg", 0.5);
-            } catch (e) {
-                return "";
-            }
+            } catch (e) { return ""; }
         };
     </script>
 
-    <!-- 2. Blazor 框架 (已經由 YAML 修正為標準檔名) -->
+    <!-- 2. Blazor 框架 (暫時不處理任何亂碼，讓它自然載入) -->
     <script src="_framework/blazor.webassembly.js"></script>
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js').catch(() => { });
-        }
-    </script>
+    <!-- 3. 注意：這裡移除了 Service Worker 的註冊代碼，避免快取干擾 -->
 </body>
 
 </html>

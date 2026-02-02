@@ -25,43 +25,18 @@ jobs:
           dotnet-quality: 'preview'
 
       - name: Publish app
-        # 嘗試在命令列也加入禁止亂碼的參數
-        run: dotnet publish -c Release -o release /p:BlazorWebAssemblyFingerprint=false
-
-      - name: Global Rename (Force Strip Fingerprints)
-        # 這是最強力的一步：掃描所有帶有 10 位數亂碼的檔案，並將其重命名為標準名稱
-        run: |
-          cd release/wwwroot/_framework
-          for f in *.*.js; do
-            if [[ $f =~ ^(.+)\.[a-z0-9]{10}\.js$ ]]; then
-              newname="${BASH_REMATCH[1]}.js"
-              echo "Renaming $f to $newname"
-              mv "$f" "$newname"
-            fi
-          done
-          for f in *.*.wasm; do
-            if [[ $f =~ ^(.+)\.[a-z0-9]{10}\.wasm$ ]]; then
-              newname="${BASH_REMATCH[1]}.wasm"
-              echo "Renaming $f to $newname"
-              mv "$f" "$newname"
-            fi
-          done
-          # 特別針對 dotnet.native.js 等多重副檔名處理
-          if [ -f "dotnet.native.87vtjjdetb.js" ]; then mv "dotnet.native.87vtjjdetb.js" "dotnet.native.js"; fi
-          if [ -f "dotnet.runtime.2tx45g8lli.js" ]; then mv "dotnet.runtime.2tx45g8lli.js" "dotnet.runtime.js"; fi
-
-      - name: Fix Service Worker Integrity
-        run: |
-          if [ -f "release/wwwroot/service-worker-assets.js" ]; then
-            sed -i 's/sha256-[^"]*//g' release/wwwroot/service-worker-assets.js || true
-          fi
+        # 移除所有手動改名的參數，讓 .NET 10 用它最自然的狀態發布
+        run: dotnet publish -c Release -o release
 
       - name: Force Add .nojekyll
         run: touch release/wwwroot/.nojekyll
 
-      - name: List Files for Final Confirmation
-        # 確認更名後的結果
-        run: ls release/wwwroot/_framework
+      - name: Create 404 Copy
+        # 這是為了防止 SPA 路由失效
+        run: cp release/wwwroot/index.html release/wwwroot/404.html
+
+      - name: List Files (Debug)
+        run: find release/wwwroot/_framework -maxdepth 1
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
