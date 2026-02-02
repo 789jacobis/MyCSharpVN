@@ -5,6 +5,7 @@
 
 @* 視覺小說主控畫布 (Master Canvas) 
     整合功能：主選單、打字機對話系統、24格存檔系統 (分頁切換)、Q.Save 自動覆蓋邏輯
+    修正說明：修復 script 清單中缺失的逗號語法錯誤。
 *@
 
 <div class="vn-container" @onclick="HandleGlobalClick" style="height: 100vh; background: #0a0a0a; color: white; user-select: none; position: relative; overflow: hidden; font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;">
@@ -63,7 +64,7 @@
     }
     else if (currentState == GameMode.SaveLoad)
     {
-        <!-- 3. 讀取/存檔進度頁面 (分頁切換) -->
+        <!-- 3. 讀取/存檔進度頁面 -->
         <div class="sub-page" style="display: flex; flex-direction: column; height: 100%; background: #050505; padding: 40px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <h2 style="color: #00ffcc; margin: 0; font-size: 2.2rem; letter-spacing: 5px;">
@@ -72,7 +73,6 @@
                 <button class="btn-menu" style="width: 150px; padding: 5px;" @onclick="BackToMenu">關閉</button>
             </div>
             
-            <!-- 存檔格子顯示區 -->
             <div style="flex-grow: 1;">
                 <h3 style="color: @(isViewingQuickSave ? "#00ffcc" : "#888"); border-bottom: 1px solid #333; padding-bottom: 10px;">
                     @(isViewingQuickSave ? "QUICK SAVE SLOTS" : "NORMAL SAVE SLOTS")
@@ -89,7 +89,6 @@
                 </div>
             </div>
 
-            <!-- 分頁切換按鈕 (右下角) -->
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
                 <button class="btn-tab @(!isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = false">Normal Save</button>
                 <button class="btn-tab @(isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = true">Quick Save</button>
@@ -107,85 +106,30 @@
 </div>
 
 <style>
-    .btn-menu {
-        background: rgba(0, 255, 204, 0.03);
-        border: 1px solid rgba(0, 255, 204, 0.4);
-        color: #fff;
-        padding: 14px;
-        font-size: 1.25rem;
-        cursor: pointer;
-        transition: 0.3s;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        backdrop-filter: blur(4px);
-        text-align: center;
-    }
+    .btn-menu { background: rgba(0, 255, 204, 0.03); border: 1px solid rgba(0, 255, 204, 0.4); color: #fff; padding: 14px; font-size: 1.25rem; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px; backdrop-filter: blur(4px); text-align: center; }
     .btn-menu:hover { background: #00ffcc; color: #000; box-shadow: 0 0 15px #00ffcc; }
-
-    /* HUD 按鈕樣式 */
-    .btn-hud {
-        background: rgba(0, 0, 0, 0.7);
-        border: 1px solid #00ffcc;
-        color: #00ffcc;
-        padding: 5px 12px;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: 0.2s;
-        border-radius: 4px 4px 0 0;
-    }
+    .btn-hud { background: rgba(0, 0, 0, 0.7); border: 1px solid #00ffcc; color: #00ffcc; padding: 5px 12px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; border-radius: 4px 4px 0 0; }
     .btn-hud:hover { background: #00ffcc; color: #000; }
-
-    /* 分頁切換樣式 */
-    .btn-tab {
-        background: #111;
-        border: 1px solid #333;
-        color: #666;
-        padding: 10px 20px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
+    .btn-tab { background: #111; border: 1px solid #333; color: #666; padding: 10px 20px; cursor: pointer; transition: 0.3s; }
     .btn-tab.active { border-color: #00ffcc; color: #00ffcc; background: rgba(0, 255, 204, 0.1); }
-
-    /* 存檔格子樣式 */
-    .save-slot {
-        background: #111;
-        border: 1px solid #333;
-        padding: 15px;
-        cursor: pointer;
-        transition: 0.2s;
-        min-height: 80px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        border-radius: 4px;
-    }
+    .save-slot { background: #111; border: 1px solid #333; padding: 15px; cursor: pointer; transition: 0.2s; min-height: 80px; display: flex; flex-direction: column; justify-content: center; border-radius: 4px; }
     .save-slot:hover { border-color: #eee; background: #1a1a1a; }
     .save-slot.quick { border-color: #003322; }
     .save-slot.quick:hover { border-color: #00ffcc; background: #001100; }
     .save-slot.has-data { background: #1a1a1a; border-left: 4px solid #888; }
     .save-slot.quick.has-data { border-left: 4px solid #00ffcc; }
-    
     .slot-number { font-size: 0.75rem; color: #555; margin-bottom: 6px; }
     .slot-info { font-size: 0.9rem; color: #888; }
     .save-slot.has-data .slot-info { color: #ccc; }
-
-    @@keyframes pulse {
-        0% { opacity: 0.3; transform: translateY(0); }
-        50% { opacity: 1; transform: translateY(-3px); }
-        100% { opacity: 0.3; transform: translateY(0); }
-    }
-
-    @@keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+    @@keyframes pulse { 0% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } 100% { opacity: 0.3; transform: translateY(0); } }
+    @@keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 
 @code {
     private enum GameMode { MainMenu, Playing, SaveLoad, Settings, Gallery }
     private GameMode currentState = GameMode.MainMenu;
     private bool isSaveMode = false;
-    private bool isViewingQuickSave = false; // 控制當前顯示哪一個分頁
+    private bool isViewingQuickSave = false;
 
     public class DialogueLine {
         public string CharacterName { get; set; } = "";
@@ -207,17 +151,17 @@
         new DialogueLine { CharacterName = "系統", Text = "正在重新校準界面協議..." },
         new DialogueLine { CharacterName = "主角", Text = "這才是真正的視覺小說配置。Q.Save 已經準備就緒。" },
         new DialogueLine { CharacterName = "AI 助手", Text = "我會負責監控 12 個快速存檔槽位，自動覆蓋最舊的資料。" },
-        new DialogueLine { CharacterName = "系統", Text = "HUD 位置已修正，分頁系統上線。" }
-        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字11111。" }
-        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字22222。" }
-        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字33333。" }
-        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字55555。" }
+        new DialogueLine { CharacterName = "系統", Text = "HUD 位置已修正，分頁系統上線。" },
+        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字11111。" },
+        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字22222。" },
+        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字33333。" },
+        new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字55555。" },
         new DialogueLine { CharacterName = "系統", Text = "這是用來測試的文字44444。" }
     };
 
     private DialogueLine currentLine => script.Count > index ? script[index] : new DialogueLine();
 
-    // --- 改進的存檔/讀取邏輯 ---
+    // --- 存檔/讀取邏輯 ---
 
     private async Task OpenSaveLoadPage(bool viewingQuick) {
         isSaveMode = false;
@@ -233,20 +177,12 @@
         SwitchState(GameMode.SaveLoad);
     }
 
-    // 核心 Q.Save 邏輯：自動搜尋或覆蓋最舊
     private async Task PerformQuickSave() {
         await RefreshSaveCache();
         int targetSlot = -1;
-
-        // 1. 尋找第一個空位
         for (int i = 1; i <= 12; i++) {
-            if (!HasData(i, true)) {
-                targetSlot = i;
-                break;
-            }
+            if (!HasData(i, true)) { targetSlot = i; break; }
         }
-
-        // 2. 如果全滿，尋找 SaveTime 最早的
         if (targetSlot == -1) {
             DateTime oldestTime = DateTime.MaxValue;
             for (int i = 1; i <= 12; i++) {
@@ -256,33 +192,21 @@
                 }
             }
         }
-
-        if (targetSlot != -1) {
-            await ExecuteSave($"MyVN_Quick_{targetSlot}");
-            // 彈出一個簡單的提示 (不使用 alert)
-            Console.WriteLine($"Quick Saved to Slot {targetSlot}");
-        }
+        if (targetSlot != -1) { await ExecuteSave($"MyVN_Quick_{targetSlot}"); }
     }
 
-    // 核心 Q.Load 邏輯：自動讀取最新的快速存檔
     private async Task PerformQuickLoad() {
         await RefreshSaveCache();
         DateTime newestTime = DateTime.MinValue;
         int targetSlot = -1;
-
         for (int i = 1; i <= 12; i++) {
             if (cachedSaves.TryGetValue($"Quick_{i}", out var data) && data.SaveTime > newestTime) {
                 newestTime = data.SaveTime;
                 targetSlot = i;
             }
         }
-
-        if (targetSlot != -1) {
-            await ExecuteLoad($"Quick_{targetSlot}");
-        } else {
-            // 如果沒有 Q.Save，跳轉到讀取頁面讓玩家知道
-            await OpenSaveLoadPage(true);
-        }
+        if (targetSlot != -1) { await ExecuteLoad($"Quick_{targetSlot}"); }
+        else { await OpenSaveLoadPage(true); }
     }
 
     private async Task ExecuteSave(string key) {
@@ -304,7 +228,6 @@
         for (int i = 1; i <= 12; i++) {
             var normalJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", $"MyVN_Normal_{i}");
             if (!string.IsNullOrEmpty(normalJson)) cachedSaves[$"Normal_{i}"] = JsonSerializer.Deserialize<SaveData>(normalJson)!;
-
             var quickJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", $"MyVN_Quick_{i}");
             if (!string.IsNullOrEmpty(quickJson)) cachedSaves[$"Quick_{i}"] = JsonSerializer.Deserialize<SaveData>(quickJson)!;
         }
@@ -320,11 +243,8 @@
 
     private async Task HandleSlotClick(int slot, bool isQuick) {
         string prefix = isQuick ? "Quick" : "Normal";
-        if (isSaveMode) {
-            await ExecuteSave($"MyVN_{prefix}_{slot}");
-        } else {
-            await ExecuteLoad($"{prefix}_{slot}");
-        }
+        if (isSaveMode) { await ExecuteSave($"MyVN_{prefix}_{slot}"); }
+        else { await ExecuteLoad($"{prefix}_{slot}"); }
     }
 
     // --- 遊戲邏輯 ---
@@ -342,10 +262,8 @@
         if (currentState != GameMode.Playing) return;
         if (isTyping) cts?.Cancel();
         else {
-            if (index < script.Count - 1) {
-                index++;
-                await TypeCurrentLine();
-            } else BackToMenu();
+            if (index < script.Count - 1) { index++; await TypeCurrentLine(); }
+            else BackToMenu();
         }
     }
 
