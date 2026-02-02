@@ -5,7 +5,7 @@
 
 @* 視覺小說主控畫布 (Master Canvas) 
     整合功能：主選單、打字機對話系統、24格存檔系統 (分頁切換)、Q.Save 自動覆蓋邏輯
-    修正說明：修復 script 清單中缺失的逗號語法錯誤。
+    修正說明：修正存檔頁面關閉時會錯誤跳回主選單的問題，改為回歸上一個狀態。
 *@
 
 <div class="vn-container" @onclick="HandleGlobalClick" style="height: 100vh; background: #0a0a0a; color: white; user-select: none; position: relative; overflow: hidden; font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;">
@@ -70,7 +70,8 @@
                 <h2 style="color: #00ffcc; margin: 0; font-size: 2.2rem; letter-spacing: 5px;">
                     @(isSaveMode ? (isViewingQuickSave ? "快速存檔管理" : "保存進度") : (isViewingQuickSave ? "快速讀取" : "讀取進度"))
                 </h2>
-                <button class="btn-menu" style="width: 150px; padding: 5px;" @onclick="BackToMenu">關閉</button>
+                <!-- 修正：關閉按鈕現在會回到進入前的狀態 -->
+                <button class="btn-menu" style="width: 150px; padding: 5px;" @onclick="CloseSubPage">關閉</button>
             </div>
             
             <div style="flex-grow: 1;">
@@ -99,7 +100,7 @@
     {
         <div class="sub-page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: #111;">
             <h2 style="color: #00ffcc; margin-bottom: 30px;">@currentState 頁面開發中...</h2>
-            <button class="btn-menu" style="width: 200px;" @onclick="BackToMenu">返回主選單</button>
+            <button class="btn-menu" style="width: 200px;" @onclick="CloseSubPage">返回</button>
         </div>
     }
 
@@ -128,6 +129,7 @@
 @code {
     private enum GameMode { MainMenu, Playing, SaveLoad, Settings, Gallery }
     private GameMode currentState = GameMode.MainMenu;
+    private GameMode previousState = GameMode.MainMenu; // 新增：記錄上一個狀態
     private bool isSaveMode = false;
     private bool isViewingQuickSave = false;
 
@@ -164,6 +166,7 @@
     // --- 存檔/讀取邏輯 ---
 
     private async Task OpenSaveLoadPage(bool viewingQuick) {
+        previousState = currentState; // 記錄進入前的狀態
         isSaveMode = false;
         isViewingQuickSave = viewingQuick;
         await RefreshSaveCache();
@@ -171,10 +174,16 @@
     }
 
     private async Task OpenSaveLoadInGame(bool saving, bool viewingQuick) {
+        previousState = currentState; // 記錄進入前的狀態
         isSaveMode = saving;
         isViewingQuickSave = viewingQuick;
         await RefreshSaveCache();
         SwitchState(GameMode.SaveLoad);
+    }
+
+    private void CloseSubPage() {
+        // 回到進入子頁面之前的狀態
+        currentState = previousState;
     }
 
     private async Task PerformQuickSave() {
@@ -249,7 +258,11 @@
 
     // --- 遊戲邏輯 ---
 
-    private void SwitchState(GameMode nextState) => currentState = nextState;
+    private void SwitchState(GameMode nextState) {
+        previousState = currentState;
+        currentState = nextState;
+    }
+    
     private void BackToMenu() => currentState = GameMode.MainMenu;
 
     private async Task StartNewGame() {
