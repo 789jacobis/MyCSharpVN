@@ -36,10 +36,9 @@
         <span class="dismiss">🗙</span>
     </div>
 
-    <!-- 1. 引入截圖庫 -->
+    <!-- 1. 截圖庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- 2. 截圖並壓縮 JS 函式 -->
     <script>
         window.captureThumbnail = async (elementSelector) => {
             const element = document.querySelector(elementSelector);
@@ -59,7 +58,7 @@
         };
     </script>
 
-    <!-- 3. Blazor 框架 -->
+    <!-- 2. Blazor 框架 (已經由 YAML 修正為標準檔名) -->
     <script src="_framework/blazor.webassembly.js"></script>
 
     <script>

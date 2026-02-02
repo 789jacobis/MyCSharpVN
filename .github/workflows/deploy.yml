@@ -21,13 +21,22 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          # 針對您專案的 .NET 10.0 設定
           dotnet-version: '10.0.x'
           dotnet-quality: 'preview'
 
       - name: Publish app
-        # 機器人會尋找資料夾內的 .csproj 並發布到 release 目錄
         run: dotnet publish -c Release -o release
+
+      - name: Rename Fingerprinted Files
+        # .NET 10 會幫檔案亂改名，這裡我們強行把它改回 index.html 能辨認的標準名稱
+        run: |
+          cd release/wwwroot/_framework
+          # 尋找 blazor.webassembly.*.js 並改名為 blazor.webassembly.js
+          REAL_NAME=$(ls blazor.webassembly.*.js | grep -v "\.gz$" | grep -v "\.br$" | head -n 1)
+          if [ ! -z "$REAL_NAME" ]; then
+            echo "Renaming $REAL_NAME to blazor.webassembly.js"
+            mv "$REAL_NAME" blazor.webassembly.js
+          fi
 
       - name: Fix Service Worker Integrity
         run: |
@@ -36,11 +45,7 @@ jobs:
           fi
 
       - name: Force Add .nojekyll
-        # 最關鍵的一步：確保 GitHub 不會忽略 _framework 資料夾
         run: touch release/wwwroot/.nojekyll
-
-      - name: List Files for Diagnosis (Debug)
-        run: find release -maxdepth 4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
