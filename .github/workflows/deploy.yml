@@ -27,15 +27,38 @@ jobs:
       - name: Publish app
         run: dotnet publish -c Release -o release
 
-      - name: Precise Rename (Entry Point Only)
-        # 只改啟動器檔案名，其餘檔案保持亂碼(指紋)以維持內部引用一致
+      - name: Precise Fingerprint Stripper (The Magic Fix)
+        # 針對 .NET 10 的強力腳本：
+        # 1. 移除所有檔案的 10 位數亂碼指紋
+        # 2. 同步修改 blazor.boot.json，讓引擎知道要去哪裡找檔案
         run: |
           cd release/wwwroot/_framework
-          REAL_NAME=$(ls blazor.webassembly.*.js | grep -v "\.gz$" | grep -v "\.br$" | head -n 1)
-          if [ ! -z "$REAL_NAME" ] && [ "$REAL_NAME" != "blazor.webassembly.js" ]; then
-            echo "Renaming $REAL_NAME to blazor.webassembly.js"
-            cp "$REAL_NAME" blazor.webassembly.js
-          fi
+          
+          # 建立一個暫時的改名映射表
+          for f in *.*.js *.*.wasm *.*.dat; do
+            if [[ $f =~ ^(.+)\.[a-z0-9]{10}\.(js|wasm|dat)$ ]]; then
+              base="${BASH_REMATCH[1]}"
+              ext="${BASH_REMATCH[2]}"
+              newname="${base}.${ext}"
+              
+              echo "Fixing: $f -> $newname"
+              
+              # 在地圖檔 (blazor.boot.json) 中把舊名字換成新名字
+              sed -i "s/$f/$newname/g" blazor.boot.json
+              
+              # 實際改名
+              mv "$f" "$newname"
+            fi
+          done
+          
+          # 額外確保 index.html 需要的那支檔案也是乾淨的
+          cp $(ls blazor.webassembly*.js | head -n 1) blazor.webassembly.js || true
+
+      - name: Disable Integrity Checks
+        # 因為我們改了檔案，原本的 SHA256 驗證會失敗，所以我們要告訴 Blazor 關閉檢查
+        run: |
+          sed -i 's/"cacheBootResources": true/"cacheBootResources": false/g' release/wwwroot/_framework/blazor.boot.json
+          sed -i 's/"integrity": "sha256-[^"]*"//g' release/wwwroot/_framework/blazor.boot.json
 
       - name: Force Add .nojekyll
         run: touch release/wwwroot/.nojekyll
