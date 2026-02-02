@@ -25,18 +25,8 @@ jobs:
           dotnet-quality: 'preview'
 
       - name: Publish app
-        run: dotnet publish -c Release -o release
-
-      - name: Rename Fingerprinted Files
-        # .NET 10 會幫檔案亂改名，這裡我們強行把它改回 index.html 能辨認的標準名稱
-        run: |
-          cd release/wwwroot/_framework
-          # 尋找 blazor.webassembly.*.js 並改名為 blazor.webassembly.js
-          REAL_NAME=$(ls blazor.webassembly.*.js | grep -v "\.gz$" | grep -v "\.br$" | head -n 1)
-          if [ ! -z "$REAL_NAME" ]; then
-            echo "Renaming $REAL_NAME to blazor.webassembly.js"
-            mv "$REAL_NAME" blazor.webassembly.js
-          fi
+        # 關鍵修正：加上 /p:BlazorWebAssemblyFingerprint=false 禁止 .NET 10 亂改檔名
+        run: dotnet publish -c Release -o release /p:BlazorWebAssemblyFingerprint=false
 
       - name: Fix Service Worker Integrity
         run: |
@@ -46,6 +36,9 @@ jobs:
 
       - name: Force Add .nojekyll
         run: touch release/wwwroot/.nojekyll
+
+      - name: List Files for Diagnosis (Debug)
+        run: find release -maxdepth 4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
