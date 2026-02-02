@@ -7,7 +7,7 @@
     <title>MyVisualNovel</title>
 
     <script>
-        // 自動判斷環境路徑
+        // 自動判斷環境：解決 localhost 與 GitHub 子目錄路徑衝突
         var path = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? '/'
             : '/MyCSharpVN/';
@@ -24,7 +24,7 @@
     <div id="app">
         <div style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif;">
             <div style="text-align:center;">
-                <div style="font-size:2rem; color:#00ffcc; margin-bottom:10px; letter-spacing:5px;">LOADING...</div>
+                <div style="font-size:2rem; color:#00ffcc; margin-bottom:10px; letter-spacing:5px; text-shadow: 0 0 10px #00ffcc;">LOADING...</div>
                 <div style="font-size:0.8rem; color:#444;">.NET 10.0 ENGINE INITIALIZING</div>
             </div>
         </div>
@@ -38,7 +38,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- 核心啟動腳本 (由 YAML 確保替身存在) -->
+    <!-- 引擎入口：YAML 的替身術會保證這支檔案一定存在 -->
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
 

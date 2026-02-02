@@ -27,43 +27,30 @@ jobs:
       - name: Publish app
         run: dotnet publish -c Release -o release
 
-      - name: Precise Fingerprint Surgery
-        # 這是專為 .NET 10 設計的手術指令
+      - name: Smart Alias Creation (The No-Fail Fix)
+        # 這是最穩定的做法：不改原本的檔案，而是建立 index.html 需要的「替身」
         run: |
           cd release/wwwroot/_framework
           
-          # 1. 自動尋找地圖檔 (不管是 blazor.boot.json 還是專案名.boot.json)
-          BOOT_JSON=$(find . -name "*.boot.json" | head -n 1)
-          echo "Found boot config: $BOOT_JSON"
+          # 1. 建立 blazor.webassembly.js 的乾淨替身
+          # 自動尋找符合 blazor.webassembly.*.js 且不是壓縮檔的檔案
+          REAL_WASM_JS=$(ls blazor.webassembly.*.js | grep -v "\.gz$" | grep -v "\.br$" | head -n 1)
+          if [ ! -z "$REAL_WASM_JS" ]; then
+            echo "Creating alias: $REAL_WASM_JS -> blazor.webassembly.js"
+            cp "$REAL_WASM_JS" blazor.webassembly.js
+          fi
 
-          # 2. 移除地圖檔中所有檔案的指紋紀錄
-          # 將像 "dotnet.j8g2lu7hu6.js" 替換成 "dotnet.js"
-          sed -i -E 's/([^"]+)\.[a-z0-9]{10}\.(js|wasm|dat)/\1.\2/g' "$BOOT_JSON"
-          
-          # 3. 實際對實體檔案進行改名
-          for f in *.*.js *.*.wasm *.*.dat; do
-            if [[ $f =~ ^(.+)\.[a-z0-9]{10}\.(js|wasm|dat)$ ]]; then
-              newname="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
-              echo "Renaming $f to $newname"
-              mv "$f" "$newname"
-            fi
-          done
-
-          # 4. 建立 index.html 需要的入口替身
-          WASM_JS=$(ls blazor.webassembly*.js | head -n 1)
-          cp "$WASM_JS" blazor.webassembly.js || true
-
-      - name: Disable Integrity Checks
-        # 因為我們改了檔案，必須關閉校驗功能，否則瀏覽器會拒絕執行
-        run: |
-          BOOT_JSON=$(find release/wwwroot/_framework -name "*.boot.json" | head -n 1)
-          sed -i 's/"cacheBootResources": true/"cacheBootResources": false/g' "$BOOT_JSON"
-          sed -i 's/"integrity": "sha256-[^"]*"//g' "$BOOT_JSON"
+          # 2. 建立地圖檔的乾淨替身 (防止引擎找不到導航圖)
+          REAL_BOOT_JSON=$(find . -name "*.boot.json" | grep -v "\.gz$" | grep -v "\.br$" | head -n 1)
+          if [ ! -z "$REAL_BOOT_JSON" ]; then
+            echo "Creating alias: $REAL_BOOT_JSON -> blazor.boot.json"
+            cp "$REAL_BOOT_JSON" blazor.boot.json
+          fi
 
       - name: Force Add .nojekyll
         run: touch release/wwwroot/.nojekyll
 
-      - name: Create 404 Page
+      - name: Create 404 Fallback
         run: cp release/wwwroot/index.html release/wwwroot/404.html
 
       - name: Upload artifact
