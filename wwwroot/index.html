@@ -7,6 +7,7 @@
     <title>MyVisualNovel</title>
 
     <script>
+        // 自動判斷環境路徑
         var path = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? '/'
             : '/MyCSharpVN/';
@@ -19,12 +20,12 @@
     <link href="MyVisualNovel.styles.css" rel="stylesheet" />
 </head>
 
-<body style="background: black;">
+<body style="background: black; color: white;">
     <div id="app">
-        <div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#000; color:#00ffcc; font-family:sans-serif;">
+        <div style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif;">
             <div style="text-align:center;">
-                <div style="font-size:2rem; margin-bottom:10px; letter-spacing:5px;">LOADING...</div>
-                <div style="font-size:0.8rem; color:#666;">.NET 10.0 CORE INITIALIZING</div>
+                <div style="font-size:2rem; color:#00ffcc; margin-bottom:10px; letter-spacing:5px;">LOADING...</div>
+                <div style="font-size:0.8rem; color:#444;">.NET 10.0 ENGINE INITIALIZING</div>
             </div>
         </div>
     </div>
@@ -37,18 +38,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <script>
-        window.captureThumbnail = async (elementSelector) => {
-            const element = document.querySelector(elementSelector);
-            if (!element) return "";
-            try {
-                const canvas = await html2canvas(element, { logging: false, scale: 0.5 });
-                return canvas.toDataURL("image/jpeg", 0.5);
-            } catch (e) { return ""; }
-        };
-    </script>
-
-    <!-- 這是唯一的入口，YAML 會保證這個檔案存在 -->
+    <!-- 核心啟動腳本 (由 YAML 確保替身存在) -->
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
 

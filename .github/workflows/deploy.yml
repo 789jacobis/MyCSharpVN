@@ -27,38 +27,19 @@ jobs:
       - name: Publish app
         run: dotnet publish -c Release -o release
 
-      - name: Precise Fingerprint Stripper (The Magic Fix)
-        # 針對 .NET 10 的強力腳本：
-        # 1. 移除所有檔案的 10 位數亂碼指紋
-        # 2. 同步修改 blazor.boot.json，讓引擎知道要去哪裡找檔案
+      - name: Create Entry Point Aliases
+        # 這是最穩定的做法：不刪除原始指紋檔，而是建立 index.html 需要的「替身」
         run: |
           cd release/wwwroot/_framework
+          # 建立 blazor.webassembly.js 的替身
+          WASM_JS=$(ls blazor.webassembly.*.js | grep -v "\.gz$" | grep -v "\.br$" | head -n 1)
+          if [ ! -z "$WASM_JS" ]; then cp "$WASM_JS" blazor.webassembly.js; fi
           
-          # 建立一個暫時的改名映射表
-          for f in *.*.js *.*.wasm *.*.dat; do
-            if [[ $f =~ ^(.+)\.[a-z0-9]{10}\.(js|wasm|dat)$ ]]; then
-              base="${BASH_REMATCH[1]}"
-              ext="${BASH_REMATCH[2]}"
-              newname="${base}.${ext}"
-              
-              echo "Fixing: $f -> $newname"
-              
-              # 在地圖檔 (blazor.boot.json) 中把舊名字換成新名字
-              sed -i "s/$f/$newname/g" blazor.boot.json
-              
-              # 實際改名
-              mv "$f" "$newname"
-            fi
-          done
+          # 建立 blazor.boot.json 的替身 (自動尋找任何 .boot.json 結尾的檔案)
+          BOOT_JSON=$(find . -name "*.boot.json" | head -n 1)
+          if [ ! -z "$BOOT_JSON" ]; then cp "$BOOT_JSON" blazor.boot.json; fi
           
-          # 額外確保 index.html 需要的那支檔案也是乾淨的
-          cp $(ls blazor.webassembly*.js | head -n 1) blazor.webassembly.js || true
-
-      - name: Disable Integrity Checks
-        # 因為我們改了檔案，原本的 SHA256 驗證會失敗，所以我們要告訴 Blazor 關閉檢查
-        run: |
-          sed -i 's/"cacheBootResources": true/"cacheBootResources": false/g' release/wwwroot/_framework/blazor.boot.json
-          sed -i 's/"integrity": "sha256-[^"]*"//g' release/wwwroot/_framework/blazor.boot.json
+          echo "Aliases created for $WASM_JS and $BOOT_JSON"
 
       - name: Force Add .nojekyll
         run: touch release/wwwroot/.nojekyll
