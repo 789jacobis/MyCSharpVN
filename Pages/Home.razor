@@ -1,55 +1,145 @@
-﻿@page "/"
+@page "/"
+@inject IJSRuntime JSRuntime
 
-<div class="vn-container" @onclick="NextLine" style="cursor:pointer; height: 100vh; background: #1a1a1a; color: white; display: flex; flex-direction: column; justify-content: flex-end; user-select: none;">
+<div class="vn-container" style="height: 100vh; background: #1a1a1a; color: white; user-select: none; position: relative; overflow: hidden;">
 
-    <div style="flex-grow: 1; display: flex; justify-content: center; align-items: center;">
-        <p style="color: #444;">[ 背景圖片預留區 ]</p>
-    </div>
+    @if (currentState == GameMode.MainMenu)
+    {
+        <div class="main-menu" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://via.placeholder.com/1920x1080'); background-size: cover;">
+            <h1 style="font-size: 4rem; color: #00ffcc; text-shadow: 0 0 20px #00ffcc; margin-bottom: 50px;">
+                我的科幻小說專案 </h1>
 
-    <div class="dialogue-box" style="border: 3px solid #00ffcc; margin: 20px; padding: 25px; background: rgba(0,0,0,0.85); min-height: 120px; border-radius: 10px; box-shadow: 0 0 15px #00ffcc;">
-        <div style="color: #00ffcc; font-weight: bold; font-size: 1.2rem; margin-bottom: 10px;">
-            @currentLine.CharacterName
+            <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 15px; width: 300px;">
+                <button class="btn-menu" @onclick="StartNewGame">開始遊戲</button>
+                <button class="btn-menu" @onclick="() => SwitchState(GameMode.SaveLoad)">讀取進度</button>
+                <button class="btn-menu" @onclick="() => SwitchState(GameMode.Settings)">遊戲設定</button>
+                <button class="btn-menu" @onclick="() => SwitchState(GameMode.Gallery)">回憶畫廊</button>
+                <button class="btn-menu" @onclick="QuitGame">離開遊戲</button>
+            </div>
         </div>
-        <div style="font-size: 1.4rem; line-height: 1.6;">
-            @currentLine.Text
+    }
+    else if (currentState == GameMode.Playing)
+    {
+        <div @onclick="NextLine" style="cursor:pointer; height: 100%; display: flex; flex-direction: column; justify-content: flex-end;">
+            <div style="flex-grow: 1; display: flex; justify-content: center; align-items: center; color: #444;">
+                [ 此處顯示 ComfyUI 生成的背景 ]
+            </div>
+
+            <div class="dialogue-box" style="border: 3px solid #00ffcc; margin: 20px; padding: 25px; background: rgba(0,0,0,0.85); min-height: 120px; border-radius: 10px;">
+                <div style="color: #00ffcc; font-weight: bold; margin-bottom: 10px;">@currentLine.CharacterName</div>
+                <div style="font-size: 1.4rem;">@currentLine.Text</div>
+                <div style="text-align: right; font-size: 0.8rem; color: #666;">▼ 點擊繼續 (或按 Esc 返回主選單)</div>
+            </div>
         </div>
-        <div style="text-align: right; font-size: 0.8rem; color: #666; margin-top: 10px;">
-            ▼ 點擊畫面繼續
+    }
+    else if (currentState == GameMode.SaveLoad)
+    {
+        <div class="sub-page">
+            <h2>讀取進度</h2>
+            <div style="display: flex; gap: 20px;">
+                <button class="btn-menu" style="width: 200px;">(a) 選擇存檔 (Load)</button>
+                <button class="btn-menu" style="width: 200px;" @onclick="QuickLoad">(b) 快速讀取 (Q.Load)</button>
+            </div>
+            <button class="btn-back" @onclick="BackToMenu">返回主選單</button>
         </div>
-    </div>
+    }
+    else if (currentState == GameMode.Settings)
+    {
+        <div class="sub-page">
+            <h2>遊戲設定</h2>
+            <p>文字速度：[ 快 -------- 慢 ]</p>
+            <button class="btn-back" @onclick="BackToMenu">返回主選單</button>
+        </div>
+    }
+    else if (currentState == GameMode.Gallery)
+    {
+        <div class="sub-page">
+            <h2>回憶畫廊</h2>
+            <p>這裡將展示您創作的人物立繪</p>
+            <button class="btn-back" @onclick="BackToMenu">返回主選單</button>
+        </div>
+    }
+
 </div>
 
+<style>
+    .btn-menu {
+        background: rgba(0, 255, 204, 0.1);
+        border: 2px solid #00ffcc;
+        color: white;
+        padding: 10px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-menu:hover {
+        background: #00ffcc;
+        color: black;
+        box-shadow: 0 0 15px #00ffcc;
+    }
+    .sub-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background: #111;
+    }
+    .btn-back {
+        margin-top: 50px;
+        background: #444;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+    }
+</style>
+
 @code {
-    // 定義每一行對話的資料結構
-    public class DialogueLine
-    {
+    // 定義遊戲狀態列舉
+    private enum GameMode { MainMenu, Playing, SaveLoad, Settings, Gallery }
+    private GameMode currentState = GameMode.MainMenu;
+
+    public class DialogueLine {
         public string CharacterName { get; set; }
         public string Text { get; set; }
     }
 
     private int index = 0;
-
-    // 您可以將您的科幻小說草稿放進這個清單
-    private List<DialogueLine> script = new List<DialogueLine>
-    {
-        new DialogueLine { CharacterName = "系統", Text = "正在連線至 GitHub 伺服器..." },
-        new DialogueLine { CharacterName = "主角", Text = "我成功了... 我真的用 C# 做出網頁遊戲了！" },
-        new DialogueLine { CharacterName = "神秘人", Text = "別高興得太早，真正的挑戰才剛開始。" },
-        new DialogueLine { CharacterName = "系統", Text = "這是一個專門為台灣開發者設計的視覺小說引擎原型。" }
+    private List<DialogueLine> script = new List<DialogueLine> {
+        new DialogueLine { CharacterName = "系統", Text = "歡迎來到科幻小說冒險。" },
+        new DialogueLine { CharacterName = "主角", Text = "新的旅程開始了..." }
     };
 
     private DialogueLine currentLine => script[index];
 
-    private void NextLine()
-    {
-        if (index < script.Count - 1)
-        {
-            index++;
+    // --- 邏輯功能區 ---
+
+    private void SwitchState(GameMode nextState) => currentState = nextState;
+
+    private void StartNewGame() {
+        index = 0; // 從最前面開始
+        currentState = GameMode.Playing;
+    }
+
+    private void QuickLoad() {
+        // 這裡未來會串接 LocalStorage
+        Console.WriteLine("執行 Q.Load...");
+        currentState = GameMode.Playing;
+    }
+
+    private void BackToMenu() => currentState = GameMode.MainMenu;
+
+    private async Task QuitGame() {
+        // 網頁版通常無法直接關閉視窗，這是一個常見的做法
+        bool confirm = await JSRuntime.InvokeAsync<bool>("confirm", "確定要離開遊戲並返回首頁嗎？");
+        if (confirm) {
+            await JSRuntime.InvokeVoidAsync("location.assign", "https://github.com/789jacobis/MyCSharpVN");
         }
-        else
-        {
-            // 如果劇本結束，重新開始（或者您可以設計跳轉到結算畫面）
-            index = 0;
-        }
+    }
+
+    private void NextLine() {
+        if (index < script.Count - 1) index++;
+        else BackToMenu();
     }
 }
