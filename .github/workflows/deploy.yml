@@ -25,18 +25,23 @@ jobs:
           dotnet-quality: 'preview'
 
       - name: Publish app
-        # 移除所有手動改名的參數，讓 .NET 10 用它最自然的狀態發布
         run: dotnet publish -c Release -o release
+
+      - name: Precise Rename (Entry Point Only)
+        # 只改啟動器檔案名，其餘檔案保持亂碼(指紋)以維持內部引用一致
+        run: |
+          cd release/wwwroot/_framework
+          REAL_NAME=$(ls blazor.webassembly.*.js | grep -v "\.gz$" | grep -v "\.br$" | head -n 1)
+          if [ ! -z "$REAL_NAME" ] && [ "$REAL_NAME" != "blazor.webassembly.js" ]; then
+            echo "Renaming $REAL_NAME to blazor.webassembly.js"
+            cp "$REAL_NAME" blazor.webassembly.js
+          fi
 
       - name: Force Add .nojekyll
         run: touch release/wwwroot/.nojekyll
 
-      - name: Create 404 Copy
-        # 這是為了防止 SPA 路由失效
+      - name: Create 404 Page
         run: cp release/wwwroot/index.html release/wwwroot/404.html
-
-      - name: List Files (Debug)
-        run: find release/wwwroot/_framework -maxdepth 1
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
