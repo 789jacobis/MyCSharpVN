@@ -1,16 +1,26 @@
-﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@inherits LayoutComponentBase
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+@* 全螢幕純淨佈局 (Clean Layout)
+    功能：移除 Blazor 預設的 Sidebar (導航欄) 和 Top Row (關於 Bar)
+    目的：讓視覺小說內容能夠佔滿整個視窗，提供沉浸式體驗。
+*@
 
-        <article class="content px-4">
-            @Body
-        </article>
+<div class="page" style="height: 100vh; width: 100vw; overflow: hidden; background-color: #000;">
+    <main style="height: 100%; width: 100%;">
+        @Body
     </main>
 </div>
+
+@* 覆寫預設 CSS 以確保沒有邊距 *@
+<style>
+    body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; }
+    
+    /* 確保移除預設的邊距干擾 */
+    .page {
+        flex-direction: column;
+    }
+    
+    main {
+        flex: 1;
+    }
+</style>
