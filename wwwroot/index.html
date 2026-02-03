@@ -43,11 +43,11 @@
             const element = document.querySelector(elementSelector);
             if (!element) return "";
             try {
-                // 方案 A 優化：提高 scale 至 0.8 以獲取更清晰的原始像素
+                // 修正：解析度翻倍 (scale: 0.8 -> 480px 寬)
                 const canvas = await html2canvas(element, {
                     logging: false,
                     useCORS: true,
-                    scale: 0.8, // 原本是 0.5，現在提高解析度
+                    scale: 0.8,
                     backgroundColor: "#1a1a2e",
                     x: 0,
                     y: 0,
@@ -56,18 +56,17 @@
                 });
                 
                 const thumbCanvas = document.createElement('canvas');
-                // 微幅增加縮圖尺寸 (240x135) 以容納更多細節，同時維持 16:9
-                thumbCanvas.width = 240; 
-                thumbCanvas.height = 135;
+                // 提高存檔解析度至 480x270 (16:9)
+                thumbCanvas.width = 480; 
+                thumbCanvas.height = 270;
                 const ctx = thumbCanvas.getContext('2d');
                 
-                // 使用高品質縮放演算法
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = "high";
                 ctx.drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
                 
-                // 提高 JPEG 品質至 0.85
-                return thumbCanvas.toDataURL("image/jpeg", 0.85); 
+                // 畫質設為 0.9 (接近無損)
+                return thumbCanvas.toDataURL("image/jpeg", 0.9); 
             } catch (e) {
                 console.error("Screenshot error:", e);
                 return "";
