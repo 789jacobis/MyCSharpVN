@@ -7,7 +7,7 @@
     <title>MyVisualNovel</title>
     
     <script>
-        // 自動判斷環境：解決 localhost 與 GitHub 子目錄路徑衝突
+        // 自動判斷環境路徑
         var path = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? '/'
             : '/MyCSharpVN/';
@@ -20,12 +20,12 @@
     <link href="MyVisualNovel.styles.css" rel="stylesheet" />
 </head>
 
-<body>
+<body style="background: black; color: white; margin: 0; overflow: hidden;">
     <div id="app">
-        <div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#000; color:#00ffcc; font-family:sans-serif;">
+        <div style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif;">
             <div style="text-align:center;">
-                <div style="font-size:2rem; margin-bottom:10px; letter-spacing:5px;">LOADING...</div>
-                <div style="font-size:0.8rem; color:#666;">.NET 10.0 ENGINE STARTING</div>
+                <div style="font-size:2rem; color:#00ffcc; margin-bottom:10px; letter-spacing:5px; text-shadow: 0 0 10px #00ffcc;">LOADING...</div>
+                <div style="font-size:0.8rem; color:#444;">.NET 10.0 ENGINE INITIALIZING</div>
             </div>
         </div>
     </div>
@@ -36,38 +36,38 @@
         <span class="dismiss">🗙</span>
     </div>
 
-    <!-- 1. 引入截圖庫 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <!-- 2. 截圖並壓縮 JS 函式 -->
+    
     <script>
         window.captureThumbnail = async (elementSelector) => {
             const element = document.querySelector(elementSelector);
             if (!element) return "";
             try {
-                // 修正：強制設定截圖範圍與座標，避免抓到黑邊
+                // 方案 A 優化：提高 scale 至 0.8 以獲取更清晰的原始像素
                 const canvas = await html2canvas(element, {
                     logging: false,
-                    useCORS: true,       // 允許跨域圖片
-                    scale: 0.5,          // 縮小比例
-                    backgroundColor: "#1a1a2e", // 設定一個預設底色(深藍)，如果圖片掛了至少有顏色
-                    x: 0,                // 強制從元素左上角開始
+                    useCORS: true,
+                    scale: 0.8, // 原本是 0.5，現在提高解析度
+                    backgroundColor: "#1a1a2e",
+                    x: 0,
                     y: 0,
-                    scrollX: 0,          // 忽略捲動條影響
+                    scrollX: 0,
                     scrollY: 0
                 });
                 
                 const thumbCanvas = document.createElement('canvas');
-                thumbCanvas.width = 200; 
-                thumbCanvas.height = 112;
+                // 微幅增加縮圖尺寸 (240x135) 以容納更多細節，同時維持 16:9
+                thumbCanvas.width = 240; 
+                thumbCanvas.height = 135;
                 const ctx = thumbCanvas.getContext('2d');
                 
-                // 使用平滑縮放演算法
+                // 使用高品質縮放演算法
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = "high";
                 ctx.drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
                 
-                return thumbCanvas.toDataURL("image/jpeg", 0.7); // 品質稍微調高到 0.7
+                // 提高 JPEG 品質至 0.85
+                return thumbCanvas.toDataURL("image/jpeg", 0.85); 
             } catch (e) {
                 console.error("Screenshot error:", e);
                 return "";
@@ -75,10 +75,8 @@
         };
     </script>
 
-    <!-- 3. Blazor 框架 -->
+    <!-- 引擎入口 -->
     <script src="_framework/blazor.webassembly.js"></script>
-    
-    <!-- 移除 Service Worker 以避免快取干擾 -->
 </body>
 
 </html>
