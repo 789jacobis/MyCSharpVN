@@ -1,20 +1,22 @@
 @page "/"
 @using System.Threading
 @using System.Text.Json
+@using System.Text.Json.Serialization
+@using System.Net.Http.Json
 @inject IJSRuntime JSRuntime
+@inject HttpClient Http
 
-@* 視覺小說主控畫布 - 截圖終極修復版
-   修正內容：
-   1. 截圖延遲增加至 300ms，確保 DOM 渲染完畢。
-   2. 遊戲背景改用 img 標籤 + 絕對定位，提高 html2canvas 識別率。
-   3. 對話框樣式簡化，移除陰影與濾鏡，確保不被略過。
+@* 視覺小說主控畫布 - 劇本外部化 (JSON 讀取版)
+   更新內容：
+   1. 注入 HttpClient 以讀取靜態 JSON 檔案。
+   2. 移除寫死在程式碼裡的 script，改由 OnInitializedAsync 從外部載入。
+   3. 支援 JSON 字串轉 Enum (SpritePos)。
 *@
 
 <div class="vn-container" @onclick="HandleGlobalClick" style="height: 100vh; background: #000; color: white; user-select: none; position: relative; overflow: hidden; font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;">
 
     @if (currentState == GameMode.MainMenu)
     {
-        <!-- 1. 主選單 -->
         <div class="main-menu" style="position: absolute; top:0; left:0; width:100%; height:100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
             <img src="images/bg_main_menu.webp" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6; z-index: -1;" />
             
@@ -22,7 +24,7 @@
                 <h1 style="font-size: 4rem; color: #00ffcc; text-shadow: 0 0 20px rgba(0,255,204,0.5); letter-spacing: 10px;">
                     宇宙邊緣的腳本家
                 </h1>
-                <p style="color: #888; letter-spacing: 3px;">Project MyCSharpVN - Capture Fix</p>
+                <p style="color: #888; letter-spacing: 3px;">Project MyCSharpVN - External JSON Script</p>
             </div>
             <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px; width: 300px; z-index: 2;">
                 <button class="btn-menu" @onclick="StartNewGame" @onclick:stopPropagation>開始遊戲</button>
@@ -34,15 +36,23 @@
     }
     else if (currentState == GameMode.Playing)
     {
-        <!-- 2. 遊戲進行畫面 (capture-target) -->
         <div class="game-view capture-target" style="height: 100%; width: 100%; position: relative; background-color: #001133;">
-            
-            <!-- 背景圖：使用 img 標籤確保被 html2canvas 抓取 -->
+            <!-- 背景圖層 -->
             <img src="images/bg_spaceship_bridge.webp" 
                  style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1; z-index: 0;" />
             
-            <!-- 對話框：高層級 z-index，純色背景 -->
-            <div class="dialogue-box" style="position: absolute; bottom: 50px; left: 5%; width: 90%; border: 3px solid #00ffcc; padding: 25px; background-color: #0a0a0a; border-radius: 10px; min-height: 160px; z-index: 99;">
+            <!-- 立繪層 (Sprites Layer) -->
+            <div class="sprite-container" style="position: absolute; bottom: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; justify-content: center; align-items: flex-end;">
+                @if (!string.IsNullOrEmpty(currentLine.CharacterSprite))
+                {
+                    <img src="@currentLine.CharacterSprite" 
+                         class="character-sprite @currentLine.SpritePos.ToString().ToLower()"
+                         style="max-height: 85vh; width: auto; transition: all 0.5s ease; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));" />
+                }
+            </div>
+
+            <!-- 對話框 -->
+            <div class="dialogue-box" style="position: absolute; bottom: 50px; left: 5%; width: 90%; border: 3px solid #00ffcc; padding: 25px; background-color: rgba(10, 10, 10, 0.95); border-radius: 10px; min-height: 160px; z-index: 99;">
                 
                 <div class="game-hud" style="position: absolute; top: -35px; right: 0; display: flex; gap: 5px; z-index: 100;">
                     <button class="btn-hud" @onclick="() => OpenSaveLoadInGame(true, false)" @onclick:stopPropagation>Save</button>
@@ -68,37 +78,28 @@
     }
     else if (currentState == GameMode.SaveLoad)
     {
-        <!-- 3. 讀取/存檔頁面 -->
-        <div class="sub-page" @onclick:stopPropagation style="position: absolute; top:0; left:0; width:100%; height:100%; background: #050505; padding: 30px; display: flex; flex-direction: column; z-index: 999;">
-            
+        <div class="sub-page" @onclick:stopPropagation style="position: absolute; top:0; left:0; width:100%; height:100%; background: #050505; padding: 30px; display: flex; flex-direction: column; z-index: 999; overflow-x: hidden;">
             <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 25px; position: relative;">
                 <div style="position: absolute; left: 0; color: #00ffcc; font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;">
                     @(isSaveMode ? "存檔模式 (SAVE)" : "讀取模式 (LOAD)")
                 </div>
-
                 <div class="tab-group" style="display: flex; background: #111; padding: 5px; border-radius: 25px; border: 1px solid #333;">
                     <button class="tab-btn @(!isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = false">NORMAL</button>
                     <button class="tab-btn @(isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = true">QUICK</button>
                 </div>
                 <button class="btn-close" style="position: absolute; right: 0;" @onclick="CloseSubPage">✕</button>
             </div>
-
-            <div class="save-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; flex-grow: 1; overflow-y: auto;">
+            <div class="save-grid custom-scrollbar" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; flex-grow: 1; overflow-y: auto; overflow-x: hidden; padding: 20px;">
                 @for (int i = 1; i <= 12; i++)
                 {
                     int slot = i;
                     var data = GetSlotData(slot, isViewingQuickSave);
                     bool isForbidden = isSaveMode && isViewingQuickSave;
-
-                    <div class="save-card @(data != null ? "has-data" : "") @(isForbidden ? "forbidden" : "")" 
-                         @onclick="() => HandleSlotClick(slot, isViewingQuickSave)">
-                        
+                    <div class="save-card @(data != null ? "has-data" : "") @(isForbidden ? "forbidden" : "")" @onclick="() => HandleSlotClick(slot, isViewingQuickSave)">
                         <div class="card-header">
                             <span>@(isViewingQuickSave ? "Q" : "")@slot.ToString("D3")</span>
                             <span class="card-time">@(data?.SaveTime.ToString("yyyy/MM/dd HH:mm:ss") ?? "------")</span>
                         </div>
-                        
-                        <!-- 縮圖顯示區：使用 background-image -->
                         <div class="card-thumb" style="background-color: #222; background-image: url('@(data?.Thumbnail ?? "")'); background-size: cover; background-position: center;">
                             @if (data == null) { <div class="empty-txt">NO DATA</div> }
                             @if (isForbidden) { <div class="forbidden-overlay"><span style="font-size: 2rem;">🚫</span><br>AUTO ONLY</div> }
@@ -108,43 +109,37 @@
             </div>
         </div>
     }
-    else if (currentState == GameMode.Settings) 
-    {
-        <div class="sub-page" @onclick:stopPropagation style="height: 100%; background: #050505; padding: 40px; display: flex; flex-direction: column;">
-             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-                <h2 style="color: #00ffcc; letter-spacing: 5px; margin: 0;">GAME SETTINGS</h2>
-                <button class="btn-menu" style="width: 120px; padding: 5px;" @onclick="CloseSubPage">Close</button>
-            </div>
-             <div class="setting-group" style="color:white; border: 1px solid #333; padding: 20px; border-radius: 10px;">
-                <label style="display:block; margin-bottom: 10px;">文字顯示速度: @textSpeed ms</label>
-                <input type="range" min="10" max="100" @bind="textSpeed" style="width: 100%; accent-color: #00ffcc;" />
-            </div>
-        </div>
-    }
 </div>
 
 <style>
+    .character-sprite { animation: fadeInSprite 0.8s ease-out; }
+    .character-sprite.left { transform: translateX(-25%); }
+    .character-sprite.center { transform: translateX(0); }
+    .character-sprite.right { transform: translateX(25%); }
+
+    @@keyframes fadeInSprite {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0a0a0a; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #00ffcc; border-radius: 4px; border: 2px solid #0a0a0a; }
     .btn-menu { background: rgba(0,255,204,0.05); border: 1px solid #00ffcc; color: #fff; padding: 12px; cursor: pointer; transition: 0.3s; letter-spacing: 2px; }
     .btn-menu:hover { background: #00ffcc; color: #000; box-shadow: 0 0 15px #00ffcc; }
     .btn-hud { background: rgba(0,0,0,0.8); border: 1px solid #00ffcc; color: #00ffcc; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; }
-    .btn-hud:hover { background: #00ffcc; color: #000; }
-    .tab-btn { background: transparent; border: none; color: #666; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: 0.3s; }
+    .tab-btn { background: transparent; border: none; color: #666; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
     .tab-btn.active { background: #00ffcc; color: #000; font-weight: bold; }
     .save-card { background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; position: relative; }
-    .save-card:not(.forbidden):hover { border-color: #00ffcc; transform: scale(1.02); z-index: 10; }
-    .save-card.forbidden { cursor: not-allowed; opacity: 0.7; border-color: #330000; }
-    .forbidden-overlay { position: absolute; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ff5555; font-weight: bold; font-size: 0.8rem; }
+    .save-card:not(.forbidden):hover { border-color: #00ffcc; transform: scale(1.02); z-index: 10; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
     .card-header { font-size: 0.7rem; padding: 4px 8px; background: #1a1a1a; display: flex; justify-content: space-between; color: #555; }
     .card-thumb { aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; background: #000; position: relative; }
-    .empty-txt { color: #333; font-weight: bold; letter-spacing: 1px; }
-    .has-data .card-header { color: #00ffcc; }
-    .btn-close { background: none; border: 1px solid #444; color: #888; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; transition: 0.3s; }
-    .btn-close:hover { border-color: #ff3333; color: #ff3333; transform: rotate(90deg); }
-    @@keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
 </style>
 
 @code {
-    private enum GameMode { MainMenu, Playing, SaveLoad, Settings }
+    public enum GameMode { MainMenu, Playing, SaveLoad, Settings }
+    public enum SpritePos { Left, Center, Right }
+
     private GameMode currentState = GameMode.MainMenu;
     private GameMode previousState = GameMode.MainMenu;
     private bool isSaveMode = false;
@@ -158,20 +153,42 @@
     private CancellationTokenSource? cts;
     private Dictionary<string, SaveData> cachedSaves = new();
 
-    public class DialogueLine { public string CharacterName { get; set; } = ""; public string Text { get; set; } = ""; }
+    public class DialogueLine { 
+        public string CharacterName { get; set; } = ""; 
+        public string Text { get; set; } = ""; 
+        public string CharacterSprite { get; set; } = ""; 
+        public SpritePos SpritePos { get; set; } = SpritePos.Center; 
+    }
     public class SaveData { public int CurrentIndex { get; set; } public DateTime SaveTime { get; set; } public string Thumbnail { get; set; } = ""; }
 
-    private List<DialogueLine> script = new() {
-        new() { CharacterName = "系統", Text = "正在載入截圖修復版引擎 4.0..." },
-        new() { CharacterName = "系統", Text = "我們加長了截圖緩衝時間到 300ms。" },
-        new() { CharacterName = "測試員", Text = "11111 - 點擊 Save，這次對話框應該會出現在截圖裡。" },
-        new() { CharacterName = "測試員", Text = "22222 - 背景圖現在是實體 img 標籤，不應該再全黑。" },
-        new() { CharacterName = "測試員", Text = "33333 - 55555 測試用對白。" },
-        new() { CharacterName = "測試員", Text = "44444 - 測試用對白。" },
-        new() { CharacterName = "測試員", Text = "55555 - 測試用對白。" }
-    };
+    // 原本寫死的劇本被移除了，改為空陣列
+    private List<DialogueLine> script = new();
 
-    private DialogueLine currentLine => script.Count > index ? script[index] : new();
+    // 防止在劇本載入完成前報錯的保護機制
+    private DialogueLine currentLine => script.Count > index ? script[index] : new DialogueLine { CharacterName = "系統", Text = "劇本載入中..." };
+
+    // 遊戲啟動時自動讀取 JSON
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            // 加入轉換器，讓 JSON 裡的字串 "Center" 可以正確轉換成 Enum SpritePos.Center
+            options.Converters.Add(new JsonStringEnumConverter());
+            
+            // 請求 wwwroot/data/script.json
+            var loadedScript = await Http.GetFromJsonAsync<List<DialogueLine>>("data/script.json", options);
+            if (loadedScript != null)
+            {
+                script = loadedScript;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"讀取劇本失敗: {ex.Message}");
+            script = new List<DialogueLine> { new DialogueLine { CharacterName = "Error", Text = "無法讀取劇本檔案 (data/script.json)。請確認檔案是否存在。" } };
+        }
+    }
 
     private async Task OpenSaveLoadPage(bool viewingQuick) {
         previousState = currentState;
@@ -184,7 +201,6 @@
     private async Task OpenSaveLoadInGame(bool saving, bool viewingQuick) {
         if (currentState == GameMode.Playing) {
             try {
-                // 強制渲染一次，並等待 300ms 讓 DOM 穩定
                 StateHasChanged();
                 await Task.Delay(300);
                 tempThumbnail = await JSRuntime.InvokeAsync<string>("captureThumbnail", ".capture-target");
@@ -201,7 +217,6 @@
 
     private async Task HandleSlotClick(int slot, bool isQuick) {
         if (isSaveMode && isQuick) return; 
-
         string key = $"MyVN_{(isQuick ? "Quick" : "Normal")}_{slot}";
         if (isSaveMode) await ExecuteSave(key);
         else await ExecuteLoad(key.Replace("MyVN_", ""));
