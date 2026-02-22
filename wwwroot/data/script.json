@@ -3,7 +3,7 @@
     "Id": "s1_line1",
     "CharacterName": "旁白",
     "Text": "【第一幕：遊戲開始】一切的開端，隱藏於黑暗之中。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_black.webp"
   },
@@ -11,7 +11,7 @@
     "Id": "s2_line1",
     "CharacterName": "旁白",
     "Text": "【第二幕】陽光灑落，嶄新的一天開始了。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_bedroom.webp"
   },
@@ -35,7 +35,7 @@
     "Id": "s3_line1",
     "CharacterName": "旁白",
     "Text": "【第三幕】空氣中瀰漫著藥劑與金屬的氣味。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_atelier.webp"
   },
@@ -92,23 +92,23 @@
     "CharacterName": "莎里亞",
     "Text": "我已經準備好隨時支援了。",
     "CharacterSprite": "images/sprite_saria.webp",
-    "SpritePos": "Left",
+    "SpritePos": "Center",
     "BackgroundImage": ""
   },
   {
     "Id": "s3_line9",
     "CharacterName": "柯菈",
-    "Text": "別大意，這裡的機關可不少。",
+    "Text": "別大意，這裡的機關可不少。（替換左邊的賽琳娜）",
     "CharacterSprite": "images/sprite_cora.webp",
-    "SpritePos": "Right",
+    "SpritePos": "Left",
     "BackgroundImage": ""
   },
   {
     "Id": "s3_line10",
     "CharacterName": "刃十三",
-    "Text": "只要有威脅，我會立刻斬斷。",
+    "Text": "只要有威脅，我會立刻斬斷。（替換右邊的瑠依）",
     "CharacterSprite": "images/sprite_blade13.webp",
-    "SpritePos": "Center",
+    "SpritePos": "Right",
     "BackgroundImage": ""
   },
   {
@@ -131,7 +131,7 @@
     "Id": "s4_line1",
     "CharacterName": "旁白",
     "Text": "【第四幕】四周再次陷入一片漆黑。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_black.webp"
   },
@@ -139,7 +139,7 @@
     "Id": "s5_line1",
     "CharacterName": "旁白",
     "Text": "【第五幕】莊嚴的鐘聲迴盪在空曠的大廳。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_church.webp"
   },
@@ -179,7 +179,7 @@
     "Id": "s6_line1",
     "CharacterName": "旁白",
     "Text": "【第六幕】短暫的黑暗遮蔽了視線。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_black.webp"
   },
@@ -187,7 +187,7 @@
     "Id": "s7_line1",
     "CharacterName": "旁白",
     "Text": "【第七幕】視線恢復，我們來到了煉金工房。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_atelier.webp"
   },
@@ -218,7 +218,7 @@
   {
     "Id": "s7_line5",
     "CharacterName": "莎里亞",
-    "Text": "不過，我們好像被困在這裡了。",
+    "Text": "不過，我們好像被困在這裡了。（替換左邊）",
     "CharacterSprite": "images/sprite_saria.webp",
     "SpritePos": "Left",
     "BackgroundImage": ""
@@ -226,7 +226,7 @@
   {
     "Id": "s7_line6",
     "CharacterName": "柯菈",
-    "Text": "大門被鎖死了，打不開。",
+    "Text": "大門被鎖死了，打不開。（替換右邊）",
     "CharacterSprite": "images/sprite_cora.webp",
     "SpritePos": "Right",
     "BackgroundImage": ""
@@ -234,7 +234,7 @@
   {
     "Id": "s7_line7",
     "CharacterName": "刃十三",
-    "Text": "要我強行破壞它嗎？",
+    "Text": "要我強行破壞它嗎？（替換左邊）",
     "CharacterSprite": "images/sprite_blade13.webp",
     "SpritePos": "Left",
     "BackgroundImage": ""
@@ -242,7 +242,7 @@
   {
     "Id": "s7_line8",
     "CharacterName": "辛西亞",
-    "Text": "等等，暴力可能觸發其他陷阱。",
+    "Text": "等等，暴力可能觸發其他陷阱。（替換右邊）",
     "CharacterSprite": "images/sprite_cynthia.webp",
     "SpritePos": "Right",
     "BackgroundImage": ""
@@ -259,7 +259,7 @@
     "Id": "s8_line1",
     "CharacterName": "旁白",
     "Text": "【第八幕】意識再度被黑暗吞噬。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_black.webp"
   },
@@ -267,7 +267,7 @@
     "Id": "s9_line1",
     "CharacterName": "旁白",
     "Text": "【第九幕】金碧輝煌的大殿，象徵著無上的權力。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_palace.webp"
   },
@@ -298,7 +298,7 @@
   {
     "Id": "s9_line5",
     "CharacterName": "莎里亞",
-    "Text": "不知道陛下會對我們說些什麼。",
+    "Text": "不知道陛下會對我們說些什麼。（替換左）",
     "CharacterSprite": "images/sprite_saria.webp",
     "SpritePos": "Left",
     "BackgroundImage": ""
@@ -306,7 +306,7 @@
   {
     "Id": "s9_line6",
     "CharacterName": "柯菈",
-    "Text": "總覺得氣氛非常沉重...",
+    "Text": "總覺得氣氛非常沉重...（替換右）",
     "CharacterSprite": "images/sprite_cora.webp",
     "SpritePos": "Right",
     "BackgroundImage": ""
@@ -314,7 +314,7 @@
   {
     "Id": "s9_line7",
     "CharacterName": "刃十三",
-    "Text": "若有變故，我會保護大家撤退。",
+    "Text": "若有變故，我會保護大家撤退。（替換左）",
     "CharacterSprite": "images/sprite_blade13.webp",
     "SpritePos": "Left",
     "BackgroundImage": ""
@@ -330,7 +330,7 @@
   {
     "Id": "s9_line9",
     "CharacterName": "千鶴",
-    "Text": "陛下已經在裡面等候多時了。",
+    "Text": "陛下已經在裡面等候多時了。（替換左）",
     "CharacterSprite": "images/sprite_chizuru.webp",
     "SpritePos": "Left",
     "BackgroundImage": ""
@@ -338,7 +338,7 @@
   {
     "Id": "s9_line10",
     "CharacterName": "芙妮維亞",
-    "Text": "請隨我來吧，各位貴賓。",
+    "Text": "請隨我來吧，各位貴賓。（替換右）",
     "CharacterSprite": "images/sprite_fnevia.webp",
     "SpritePos": "Right",
     "BackgroundImage": ""
@@ -346,7 +346,7 @@
   {
     "Id": "s9_line11",
     "CharacterName": "薩拉",
-    "Text": "希望你們帶來的消息不會讓人失望。",
+    "Text": "希望你們帶來的消息不會讓人失望。（替換中）",
     "CharacterSprite": "images/sprite_sara.webp",
     "SpritePos": "Center",
     "BackgroundImage": ""
@@ -355,7 +355,7 @@
     "Id": "s10_line1",
     "CharacterName": "薩拉",
     "Text": "【第十幕】那麼，請開始你們的報告。",
-    "CharacterSprite": "images/sprite_sara.webp",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_palace.webp"
   },
@@ -394,7 +394,7 @@
   {
     "Id": "s10_line6",
     "CharacterName": "辛西亞",
-    "Text": "如果不盡快採取行動，後果不堪設想。",
+    "Text": "如果不盡快採取行動，後果不堪設想。（替換左）",
     "CharacterSprite": "images/sprite_cynthia.webp",
     "SpritePos": "Left",
     "BackgroundImage": ""
@@ -402,7 +402,7 @@
   {
     "Id": "s10_line7",
     "CharacterName": "瑠依",
-    "Text": "這就是我們目前掌握的所有情報。",
+    "Text": "這就是我們目前掌握的所有情報。（替換右）",
     "CharacterSprite": "images/sprite_rui.webp",
     "SpritePos": "Right",
     "BackgroundImage": ""
@@ -411,7 +411,7 @@
     "Id": "s11_line1",
     "CharacterName": "旁白",
     "Text": "【第十一幕】陰暗潮濕的地下通道，充滿了未知。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_tunnel.webp"
   },
@@ -443,7 +443,7 @@
     "Id": "s12_line1",
     "CharacterName": "旁白",
     "Text": "【第十二幕】耀眼的光芒過後，是一片虛無的純白。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_white_space.webp"
   },
@@ -475,7 +475,7 @@
     "Id": "s13_line1",
     "CharacterName": "旁白",
     "Text": "【第十三幕】幻象破滅，眾人竟然又回到了皇宮。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_palace.webp"
   },
@@ -506,7 +506,7 @@
   {
     "Id": "s13_line5",
     "CharacterName": "柯菈",
-    "Text": "我的腿都快軟了...",
+    "Text": "我的腿都快軟了...（替換左）",
     "CharacterSprite": "images/sprite_cora.webp",
     "SpritePos": "Left",
     "BackgroundImage": ""
@@ -514,7 +514,7 @@
   {
     "Id": "s13_line6",
     "CharacterName": "辛西亞",
-    "Text": "至少我們都平安無事。",
+    "Text": "至少我們都平安無事。（替換右）",
     "CharacterSprite": "images/sprite_cynthia.webp",
     "SpritePos": "Right",
     "BackgroundImage": ""
@@ -522,7 +522,7 @@
   {
     "Id": "s13_line7",
     "CharacterName": "瑠依",
-    "Text": "這下總算可以鬆一口氣了。",
+    "Text": "這下總算可以鬆一口氣了。（替換左）",
     "CharacterSprite": "images/sprite_rui.webp",
     "SpritePos": "Left",
     "BackgroundImage": ""
@@ -531,7 +531,7 @@
     "Id": "s14_line1",
     "CharacterName": "旁白",
     "Text": "【第十四幕】各種精密的儀器在房間內閃爍著微光。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_laboratory.webp"
   },
@@ -563,7 +563,7 @@
     "Id": "s15_line1",
     "CharacterName": "旁白",
     "Text": "【第十五幕】繁華的街道上，人群熙來攘往。",
-    "CharacterSprite": "",
+    "CharacterSprite": "clear_all",
     "SpritePos": "Center",
     "BackgroundImage": "images/bg_street.webp"
   },
