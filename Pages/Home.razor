@@ -471,7 +471,7 @@
         if (isTyping) { cts?.Cancel(); }
         else {
             if (currentLine.Choices != null && currentLine.Choices.Any()) return;
-            GoToNextLine(currentLine.NextId);
+            GoToNextLine("");
         }
     }
 
