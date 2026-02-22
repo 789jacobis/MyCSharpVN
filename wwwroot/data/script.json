@@ -1,1 +1,30 @@
-
+[
+  {
+    "CharacterName": "系統",
+    "Text": "正在載入外部劇本核心 8.0...",
+    "CharacterSprite": "",
+    "SpritePos": "Center"
+  },
+  {
+    "CharacterName": "女騎士",
+    "Text": "指揮官，你來了。這段對白是從外部的 JSON 檔案讀取出來的喔！",
+    "CharacterSprite": "images/sprite_ai_normal.webp",
+    "SpritePos": "Center"
+  },
+  {
+    "CharacterName": "女騎士",
+    "Text": "這樣以後你只要打開 data/script.json，就能無痛擴寫劇本了。",
+    "CharacterSprite": "images/sprite_ai_normal.webp",
+    "SpritePos": "Left"
+  },
+  {
+    "CharacterName": "女騎士",
+    "Text": "接下來，就算劇本寫到一萬行，核心程式碼依然會保持乾淨！",
+    "CharacterSprite": "images/sprite_ai_normal.webp",
+    "SpritePos": "Right"
+  },
+  {
+    "CharacterName": "系統",
+    "Text": "外部腳本讀取測試結束，接下來可以準備實作「選項分歧」系統了。"
+  }
+]
