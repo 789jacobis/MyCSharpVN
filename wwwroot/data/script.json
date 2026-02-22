@@ -1,51 +1,602 @@
 [
   {
-    "Id": "start",
-    "CharacterName": "系統",
-    "Text": "正在載入動態背景核心 10.0... (破圖問題已修復)",
+    "Id": "s1_line1",
+    "CharacterName": "旁白",
+    "Text": "【第一幕：遊戲開始】一切的開端，隱藏於黑暗之中。",
     "CharacterSprite": "",
     "SpritePos": "Center",
-    "BackgroundImage": "images/bg_forest.webp"
+    "BackgroundImage": "images/bg_black.webp"
   },
   {
-    "Id": "scene1",
-    "CharacterName": "女騎士",
-    "Text": "指揮官，前面出現了岔路，我們該往哪邊走？",
-    "CharacterSprite": "images/sprite_ai_normal.webp",
+    "Id": "s2_line1",
+    "CharacterName": "旁白",
+    "Text": "【第二幕】陽光灑落，嶄新的一天開始了。",
+    "CharacterSprite": "",
     "SpritePos": "Center",
-    "BackgroundImage": "",
-    "Choices": [
-      {
-        "Text": "往左邊的森林前進",
-        "TargetId": "path_left"
-      },
-      {
-        "Text": "往右邊的廢墟探索",
-        "TargetId": "path_right"
-      }
-    ]
+    "BackgroundImage": "images/bg_bedroom.webp"
   },
   {
-    "Id": "path_left",
-    "CharacterName": "女騎士",
-    "Text": "森林裡的樹木非常茂密，視線有些不佳，請跟緊我。",
-    "CharacterSprite": "images/sprite_ai_normal.webp",
-    "SpritePos": "Left",
-    "BackgroundImage": "images/bg_ruins.webp",
-    "NextId": "end_scene"
+    "Id": "s2_line2",
+    "CharacterName": "蜜媞絲",
+    "Text": "早安！今天的天氣看起來真不錯呢。",
+    "CharacterSprite": "images/sprite_metis.webp",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
   },
   {
-    "Id": "path_right",
-    "CharacterName": "女騎士",
-    "Text": "廢墟中可能藏有舊時代的危險遺物，我們小心前進吧。",
-    "CharacterSprite": "images/sprite_ai_normal.webp",
+    "Id": "s2_line3",
+    "CharacterName": "辛西亞",
+    "Text": "是啊，我們該準備出發了。",
+    "CharacterSprite": "images/sprite_cynthia.webp",
     "SpritePos": "Right",
-    "BackgroundImage": "images/bg_ruins.webp",
-    "NextId": "end_scene"
+    "BackgroundImage": ""
   },
   {
-    "Id": "end_scene",
-    "CharacterName": "系統",
-    "Text": "動態背景與分歧路線測試結束。現在引擎已經非常完整了！"
+    "Id": "s3_line1",
+    "CharacterName": "旁白",
+    "Text": "【第三幕】空氣中瀰漫著藥劑與金屬的氣味。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_atelier.webp"
+  },
+  {
+    "Id": "s3_line2",
+    "CharacterName": "神秘人A",
+    "Text": "材料都準備好了嗎？",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s3_line3",
+    "CharacterName": "神秘人B",
+    "Text": "是的，隨時可以開始。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s3_line4",
+    "CharacterName": "神秘人C",
+    "Text": "千萬別出差錯了。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s3_line5",
+    "CharacterName": "神秘人D",
+    "Text": "放心交給我吧。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s3_line6",
+    "CharacterName": "賽琳娜",
+    "Text": "看來這裡比想像中還要熱鬧。",
+    "CharacterSprite": "images/sprite_serena.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s3_line7",
+    "CharacterName": "瑠依",
+    "Text": "大家提高警覺，情況不明。",
+    "CharacterSprite": "images/sprite_rui.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s3_line8",
+    "CharacterName": "莎里亞",
+    "Text": "我已經準備好隨時支援了。",
+    "CharacterSprite": "images/sprite_saria.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s3_line9",
+    "CharacterName": "柯菈",
+    "Text": "別大意，這裡的機關可不少。",
+    "CharacterSprite": "images/sprite_cora.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s3_line10",
+    "CharacterName": "刃十三",
+    "Text": "只要有威脅，我會立刻斬斷。",
+    "CharacterSprite": "images/sprite_blade13.webp",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s3_line11",
+    "CharacterName": "？？？",
+    "Text": "呵呵，沒想到你們能找到這裡來。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s3_line12",
+    "CharacterName": "艾克蘭",
+    "Text": "你到底是誰？有什麼目的！",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s4_line1",
+    "CharacterName": "旁白",
+    "Text": "【第四幕】四周再次陷入一片漆黑。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_black.webp"
+  },
+  {
+    "Id": "s5_line1",
+    "CharacterName": "旁白",
+    "Text": "【第五幕】莊嚴的鐘聲迴盪在空曠的大廳。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_church.webp"
+  },
+  {
+    "Id": "s5_line2",
+    "CharacterName": "艾克蘭",
+    "Text": "這裡就是傳說中的教堂嗎？",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s5_line3",
+    "CharacterName": "賽琳娜",
+    "Text": "氣氛讓人感到有些不自在。",
+    "CharacterSprite": "images/sprite_serena.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s5_line4",
+    "CharacterName": "柯菈",
+    "Text": "我們最好別亂碰任何東西。",
+    "CharacterSprite": "images/sprite_cora.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s5_line5",
+    "CharacterName": "刃十三",
+    "Text": "我感覺到暗處有視線在盯著我們。",
+    "CharacterSprite": "images/sprite_blade13.webp",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s6_line1",
+    "CharacterName": "旁白",
+    "Text": "【第六幕】短暫的黑暗遮蔽了視線。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_black.webp"
+  },
+  {
+    "Id": "s7_line1",
+    "CharacterName": "旁白",
+    "Text": "【第七幕】視線恢復，我們來到了煉金工房。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_atelier.webp"
+  },
+  {
+    "Id": "s7_line2",
+    "CharacterName": "艾克蘭",
+    "Text": "剛才那到底是怎麼回事？",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s7_line3",
+    "CharacterName": "賽琳娜",
+    "Text": "似乎是某種空間轉移的魔法。",
+    "CharacterSprite": "images/sprite_serena.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s7_line4",
+    "CharacterName": "瑠依",
+    "Text": "幸好大家都平安無事。",
+    "CharacterSprite": "images/sprite_rui.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s7_line5",
+    "CharacterName": "莎里亞",
+    "Text": "不過，我們好像被困在這裡了。",
+    "CharacterSprite": "images/sprite_saria.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s7_line6",
+    "CharacterName": "柯菈",
+    "Text": "大門被鎖死了，打不開。",
+    "CharacterSprite": "images/sprite_cora.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s7_line7",
+    "CharacterName": "刃十三",
+    "Text": "要我強行破壞它嗎？",
+    "CharacterSprite": "images/sprite_blade13.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s7_line8",
+    "CharacterName": "辛西亞",
+    "Text": "等等，暴力可能觸發其他陷阱。",
+    "CharacterSprite": "images/sprite_cynthia.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s7_line9",
+    "CharacterName": "艾克蘭",
+    "Text": "讓我想想...一定有什麼解開的辦法。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s8_line1",
+    "CharacterName": "旁白",
+    "Text": "【第八幕】意識再度被黑暗吞噬。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_black.webp"
+  },
+  {
+    "Id": "s9_line1",
+    "CharacterName": "旁白",
+    "Text": "【第九幕】金碧輝煌的大殿，象徵著無上的權力。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_palace.webp"
+  },
+  {
+    "Id": "s9_line2",
+    "CharacterName": "艾克蘭",
+    "Text": "沒想到我們能走到這一步。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s9_line3",
+    "CharacterName": "賽琳娜",
+    "Text": "保持肅靜，這裡不是可以隨便說話的地方。",
+    "CharacterSprite": "images/sprite_serena.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s9_line4",
+    "CharacterName": "瑠依",
+    "Text": "明白，我會注意禮節的。",
+    "CharacterSprite": "images/sprite_rui.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s9_line5",
+    "CharacterName": "莎里亞",
+    "Text": "不知道陛下會對我們說些什麼。",
+    "CharacterSprite": "images/sprite_saria.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s9_line6",
+    "CharacterName": "柯菈",
+    "Text": "總覺得氣氛非常沉重...",
+    "CharacterSprite": "images/sprite_cora.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s9_line7",
+    "CharacterName": "刃十三",
+    "Text": "若有變故，我會保護大家撤退。",
+    "CharacterSprite": "images/sprite_blade13.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s9_line8",
+    "CharacterName": "梅鐸兒",
+    "Text": "歡迎各位來到皇宮。",
+    "CharacterSprite": "images/sprite_medor.webp",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s9_line9",
+    "CharacterName": "千鶴",
+    "Text": "陛下已經在裡面等候多時了。",
+    "CharacterSprite": "images/sprite_chizuru.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s9_line10",
+    "CharacterName": "芙妮維亞",
+    "Text": "請隨我來吧，各位貴賓。",
+    "CharacterSprite": "images/sprite_fnevia.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s9_line11",
+    "CharacterName": "薩拉",
+    "Text": "希望你們帶來的消息不會讓人失望。",
+    "CharacterSprite": "images/sprite_sara.webp",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s10_line1",
+    "CharacterName": "薩拉",
+    "Text": "【第十幕】那麼，請開始你們的報告。",
+    "CharacterSprite": "images/sprite_sara.webp",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_palace.webp"
+  },
+  {
+    "Id": "s10_line2",
+    "CharacterName": "旁白",
+    "Text": "一場決定帝國未來的對話即將展開。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s10_line3",
+    "CharacterName": "艾克蘭",
+    "Text": "事情是這樣的，我們在邊境發現了...",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s10_line4",
+    "CharacterName": "賽琳娜",
+    "Text": "並且找到了這份關鍵的文件。",
+    "CharacterSprite": "images/sprite_serena.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s10_line5",
+    "CharacterName": "柯菈",
+    "Text": "上面的印記證實了我們的猜測。",
+    "CharacterSprite": "images/sprite_cora.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s10_line6",
+    "CharacterName": "辛西亞",
+    "Text": "如果不盡快採取行動，後果不堪設想。",
+    "CharacterSprite": "images/sprite_cynthia.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s10_line7",
+    "CharacterName": "瑠依",
+    "Text": "這就是我們目前掌握的所有情報。",
+    "CharacterSprite": "images/sprite_rui.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s11_line1",
+    "CharacterName": "旁白",
+    "Text": "【第十一幕】陰暗潮濕的地下通道，充滿了未知。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_tunnel.webp"
+  },
+  {
+    "Id": "s11_line2",
+    "CharacterName": "艾克蘭",
+    "Text": "這條密道真的安全嗎？",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s11_line3",
+    "CharacterName": "辛西亞",
+    "Text": "這是唯一的捷徑了，只能硬著頭皮走。",
+    "CharacterSprite": "images/sprite_cynthia.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s11_line4",
+    "CharacterName": "薩拉",
+    "Text": "跟緊我，這裡我比較熟。",
+    "CharacterSprite": "images/sprite_sara.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s12_line1",
+    "CharacterName": "旁白",
+    "Text": "【第十二幕】耀眼的光芒過後，是一片虛無的純白。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_white_space.webp"
+  },
+  {
+    "Id": "s12_line2",
+    "CharacterName": "艾克蘭",
+    "Text": "這裡是哪裡？我們怎麼會在這裡？",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s12_line3",
+    "CharacterName": "蜜媞絲",
+    "Text": "好像是精神領域之類的空間...",
+    "CharacterSprite": "images/sprite_metis.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s12_line4",
+    "CharacterName": "辛西亞",
+    "Text": "我們必須找到出口，不能被困在這裡。",
+    "CharacterSprite": "images/sprite_cynthia.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s13_line1",
+    "CharacterName": "旁白",
+    "Text": "【第十三幕】幻象破滅，眾人竟然又回到了皇宮。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_palace.webp"
+  },
+  {
+    "Id": "s13_line2",
+    "CharacterName": "艾克蘭",
+    "Text": "又回來了？這到底是怎麼回事...",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s13_line3",
+    "CharacterName": "蜜媞絲",
+    "Text": "看來剛才的一切都只是一場考驗。",
+    "CharacterSprite": "images/sprite_metis.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s13_line4",
+    "CharacterName": "賽琳娜",
+    "Text": "真是讓人捏了一把冷汗。",
+    "CharacterSprite": "images/sprite_serena.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s13_line5",
+    "CharacterName": "柯菈",
+    "Text": "我的腿都快軟了...",
+    "CharacterSprite": "images/sprite_cora.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s13_line6",
+    "CharacterName": "辛西亞",
+    "Text": "至少我們都平安無事。",
+    "CharacterSprite": "images/sprite_cynthia.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s13_line7",
+    "CharacterName": "瑠依",
+    "Text": "這下總算可以鬆一口氣了。",
+    "CharacterSprite": "images/sprite_rui.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s14_line1",
+    "CharacterName": "旁白",
+    "Text": "【第十四幕】各種精密的儀器在房間內閃爍著微光。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_laboratory.webp"
+  },
+  {
+    "Id": "s14_line2",
+    "CharacterName": "蜜媞絲",
+    "Text": "這裡的設備真先進，是用來做什麼的？",
+    "CharacterSprite": "images/sprite_metis.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s14_line3",
+    "CharacterName": "艾克蘭",
+    "Text": "或許這裡藏著我們要找的最終答案。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s14_line4",
+    "CharacterName": "辛西亞",
+    "Text": "我們快點調查一下周圍吧。",
+    "CharacterSprite": "images/sprite_cynthia.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s15_line1",
+    "CharacterName": "旁白",
+    "Text": "【第十五幕】繁華的街道上，人群熙來攘往。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": "images/bg_street.webp"
+  },
+  {
+    "Id": "s15_line2",
+    "CharacterName": "蜜媞絲",
+    "Text": "終於呼吸到外面的空氣了，真舒服！",
+    "CharacterSprite": "images/sprite_metis.webp",
+    "SpritePos": "Left",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s15_line3",
+    "CharacterName": "艾克蘭",
+    "Text": "是啊，感覺一切就像是一場夢。",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s15_line4",
+    "CharacterName": "辛西亞",
+    "Text": "我們的旅程，才正要開始呢。",
+    "CharacterSprite": "images/sprite_cynthia.webp",
+    "SpritePos": "Right",
+    "BackgroundImage": ""
+  },
+  {
+    "Id": "s15_line5",
+    "CharacterName": "民女A",
+    "Text": "哎呀，這不是拯救了城市的大英雄們嗎！",
+    "CharacterSprite": "",
+    "SpritePos": "Center",
+    "BackgroundImage": ""
   }
 ]
