@@ -138,8 +138,8 @@
 </style>
 
 @code {
-    private enum GameMode { MainMenu, Playing, SaveLoad, Settings }
-    private enum SpritePos { Left, Center, Right }
+    public enum GameMode { MainMenu, Playing, SaveLoad, Settings }
+    public enum SpritePos { Left, Center, Right }
     private GameMode currentState = GameMode.MainMenu;
     private GameMode previousState = GameMode.MainMenu;
     private bool isSaveMode = false;
