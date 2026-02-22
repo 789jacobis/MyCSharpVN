@@ -7,11 +7,11 @@
 @inject IJSRuntime JSRuntime
 @inject HttpClient Http
 
-@* 視覺小說主控畫布 - 劇情選項分歧版
+@* 視覺小說主控畫布 - 歷史對話紀錄 (Log) & UI 修復版
    更新內容：
-   1. 支援 Choices 與 Id 跳轉邏輯。
-   2. 新增選項 UI (choices-container) 覆蓋層。
-   3. 存檔系統升級，加入 LineId 紀錄以確保讀檔正確性。
+   1. 新增 historyLog 串列，記錄玩家看過的對白。
+   2. 實作 Log 介面與對話框上的 Log 按鈕。
+   3. 強化 SaveLoad 頁面右上角 .btn-close 按鈕的能見度。
 *@
 
 <div class="vn-container" @onclick="HandleGlobalClick" style="height: 100vh; background: #000; color: white; user-select: none; position: relative; overflow: hidden; font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;">
@@ -25,7 +25,7 @@
                 <h1 style="font-size: 4rem; color: #00ffcc; text-shadow: 0 0 20px rgba(0,255,204,0.5); letter-spacing: 10px;">
                     宇宙邊緣的腳本家
                 </h1>
-                <p style="color: #888; letter-spacing: 3px;">Project MyCSharpVN - Choice System</p>
+                <p style="color: #888; letter-spacing: 3px;">Project MyCSharpVN - History Log</p>
             </div>
             <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px; width: 300px; z-index: 2;">
                 <button class="btn-menu" @onclick="StartNewGame" @onclick:stopPropagation>開始遊戲</button>
@@ -53,43 +53,74 @@
             </div>
 
             <!-- 選項介面 (Choices Layer) -->
-            @if (currentLine.Choices != null && currentLine.Choices.Any() && !isTyping)
+            @if (currentLine.Choices != null && currentLine.Choices.Any() && !isTyping && !showLog)
             {
                 <div class="choices-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index: 150;">
                     @foreach (var choice in currentLine.Choices)
                     {
-                        <button class="btn-choice" @onclick="() => MakeChoice(choice.TargetId)" @onclick:stopPropagation>@choice.Text</button>
+                        <button class="btn-choice" @onclick="() => MakeChoice(choice)" @onclick:stopPropagation>@choice.Text</button>
                     }
                 </div>
             }
 
-            <!-- 對話框 -->
-            <div class="dialogue-box" style="position: absolute; bottom: 50px; left: 5%; width: 90%; border: 3px solid #00ffcc; padding: 25px; background-color: rgba(10, 10, 10, 0.95); border-radius: 10px; min-height: 160px; z-index: 99;">
-                
-                <div class="game-hud" style="position: absolute; top: -35px; right: 0; display: flex; gap: 5px; z-index: 100;">
-                    <button class="btn-hud" @onclick="() => OpenSaveLoadInGame(true, false)" @onclick:stopPropagation>Save</button>
-                    <button class="btn-hud" @onclick="PerformQuickSave" @onclick:stopPropagation>Q.Save</button>
-                    <button class="btn-hud" @onclick="() => OpenSaveLoadInGame(false, false)" @onclick:stopPropagation>Load</button>
-                    <button class="btn-hud" @onclick="PerformQuickLoad" @onclick:stopPropagation>Q.Load</button>
-                    <button class="btn-hud" @onclick="BackToMenu" @onclick:stopPropagation>Menu</button>
+            <!-- 歷史對話紀錄 (Log Layer) -->
+            @if (showLog)
+            {
+                <div class="log-overlay" @onclick="ToggleLog" @onclick:stopPropagation style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; display: flex; flex-direction: column; padding: 40px;">
+                    <h2 style="color: #00ffcc; margin-bottom: 20px; text-align: center; letter-spacing: 5px;">歷史對話紀錄 (BACKLOG)</h2>
+                    
+                    <div class="log-content custom-scrollbar" @onclick:stopPropagation style="flex-grow: 1; overflow-y: auto; padding-right: 20px; display: flex; flex-direction: column; gap: 15px;">
+                        @foreach (var logLine in historyLog)
+                        {
+                            <div class="log-item" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border-left: 4px solid #00ffcc;">
+                                <div style="color: #00ffcc; font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">@logLine.CharacterName</div>
+                                <div style="color: #eee; font-size: 1.2rem; line-height: 1.5;">@logLine.Text</div>
+                            </div>
+                        }
+                        @if (historyLog.Count == 0)
+                        {
+                            <div style="text-align: center; color: #888; margin-top: 50px; font-style: italic;">尚無對話紀錄...</div>
+                        }
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn-menu" @onclick="ToggleLog" @onclick:stopPropagation style="width: 200px;">返回遊戲</button>
+                    </div>
                 </div>
+            }
 
-                <div class="char-name" style="color: #00ffcc; font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #333; display: inline-block;">
-                    @currentLine.CharacterName
+            <!-- 對話框 (如果不顯示 Log 才出現) -->
+            @if (!showLog)
+            {
+                <div class="dialogue-box" style="position: absolute; bottom: 50px; left: 5%; width: 90%; border: 3px solid #00ffcc; padding: 25px; background-color: rgba(10, 10, 10, 0.95); border-radius: 10px; min-height: 160px; z-index: 99;">
+                    
+                    <div class="game-hud" style="position: absolute; top: -35px; right: 0; display: flex; gap: 5px; z-index: 100;">
+                        <!-- 新增 Log 按鈕 -->
+                        <button class="btn-hud" @onclick="ToggleLog" @onclick:stopPropagation>Log</button>
+                        <button class="btn-hud" @onclick="() => OpenSaveLoadInGame(true, false)" @onclick:stopPropagation>Save</button>
+                        <button class="btn-hud" @onclick="PerformQuickSave" @onclick:stopPropagation>Q.Save</button>
+                        <button class="btn-hud" @onclick="() => OpenSaveLoadInGame(false, false)" @onclick:stopPropagation>Load</button>
+                        <button class="btn-hud" @onclick="PerformQuickLoad" @onclick:stopPropagation>Q.Load</button>
+                        <button class="btn-hud" @onclick="BackToMenu" @onclick:stopPropagation>Menu</button>
+                    </div>
+
+                    <div class="char-name" style="color: #00ffcc; font-size: 1.4rem; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #333; display: inline-block;">
+                        @currentLine.CharacterName
+                    </div>
+                    
+                    <div class="text-content" style="font-size: 1.3rem; line-height: 1.6; color: #fff;">
+                        @displayedText
+                    </div>
+                    
+                    <div class="next-indicator" style="position: absolute; bottom: 15px; right: 20px; color: #00ffcc; font-size: 0.9rem;">
+                        @if (currentLine.Choices != null && currentLine.Choices.Any()) {
+                            <span>...</span>
+                        } else {
+                            @(isTyping ? "▶" : "▼")
+                        }
+                    </div>
                 </div>
-                
-                <div class="text-content" style="font-size: 1.3rem; line-height: 1.6; color: #fff;">
-                    @displayedText
-                </div>
-                
-                <div class="next-indicator" style="position: absolute; bottom: 15px; right: 20px; color: #00ffcc; font-size: 0.9rem;">
-                    @if (currentLine.Choices != null && currentLine.Choices.Any()) {
-                        <span>...</span>
-                    } else {
-                        @(isTyping ? "▶" : "▼")
-                    }
-                </div>
-            </div>
+            }
         </div>
     }
     else if (currentState == GameMode.SaveLoad)
@@ -103,6 +134,7 @@
                     <button class="tab-btn @(!isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = false">NORMAL</button>
                     <button class="tab-btn @(isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = true">QUICK</button>
                 </div>
+                <!-- 修復：強化關閉按鈕的樣式 -->
                 <button class="btn-close" style="position: absolute; right: 0;" @onclick="CloseSubPage">✕</button>
             </div>
             <div class="save-grid custom-scrollbar" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; flex-grow: 1; overflow-y: auto; overflow-x: hidden; padding: 20px;">
@@ -128,7 +160,31 @@
 </div>
 
 <style>
-    /* 立繪特效 */
+    /* 關閉按鈕強化樣式 */
+    .btn-close { 
+        background: rgba(255, 255, 255, 0.1); 
+        border: 2px solid #888; 
+        color: #fff; 
+        border-radius: 50%; 
+        width: 40px; 
+        height: 40px; 
+        cursor: pointer; 
+        transition: 0.3s; 
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    .btn-close:hover { 
+        border-color: #ff3333; 
+        background: rgba(255, 51, 51, 0.2);
+        color: #ff3333; 
+        transform: rotate(90deg) scale(1.1); 
+        box-shadow: 0 0 15px rgba(255,51,51,0.5);
+    }
+
+    /* 其他原有的樣式 */
     .character-sprite { animation: fadeInSprite 0.8s ease-out; }
     .character-sprite.left { transform: translateX(-25%); }
     .character-sprite.center { transform: translateX(0); }
@@ -139,7 +195,6 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* 分歧選項按鈕樣式 */
     .btn-choice {
         background: rgba(0, 0, 0, 0.8);
         border: 2px solid #00ffcc;
@@ -168,6 +223,7 @@
     .btn-menu { background: rgba(0,255,204,0.05); border: 1px solid #00ffcc; color: #fff; padding: 12px; cursor: pointer; transition: 0.3s; letter-spacing: 2px; }
     .btn-menu:hover { background: #00ffcc; color: #000; box-shadow: 0 0 15px #00ffcc; }
     .btn-hud { background: rgba(0,0,0,0.8); border: 1px solid #00ffcc; color: #00ffcc; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; }
+    .btn-hud:hover { background: #00ffcc; color: #000; }
     .tab-btn { background: transparent; border: none; color: #666; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
     .tab-btn.active { background: #00ffcc; color: #000; font-weight: bold; }
     .save-card { background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; position: relative; }
@@ -185,6 +241,11 @@
     private bool isSaveMode = false;
     private bool isViewingQuickSave = false;
 
+    // 新增：控制 Log 視窗的顯示狀態
+    private bool showLog = false;
+    // 新增：儲存對話歷史紀錄的串列
+    private List<LogEntry> historyLog = new();
+
     private int textSpeed = 40;
     private int index = 0;
     private string displayedText = "";
@@ -193,13 +254,11 @@
     private CancellationTokenSource? cts;
     private Dictionary<string, SaveData> cachedSaves = new();
 
-    // 新增：選項資料模型
     public class Choice {
         public string Text { get; set; } = "";
         public string TargetId { get; set; } = "";
     }
 
-    // 更新：加入 Id, NextId 與 Choices
     public class DialogueLine { 
         public string Id { get; set; } = "";
         public string NextId { get; set; } = "";
@@ -210,12 +269,19 @@
         public List<Choice>? Choices { get; set; }
     }
 
-    // 更新：存檔資料加入 LineId 防止修改劇本後錯亂
     public class SaveData { 
         public int CurrentIndex { get; set; } 
         public string LineId { get; set; } = "";
         public DateTime SaveTime { get; set; } 
         public string Thumbnail { get; set; } = ""; 
+        // 為了完美讀檔，存檔時也把看過的 Log 存起來
+        public List<LogEntry> SavedLog { get; set; } = new();
+    }
+
+    // 新增：用於記錄每一筆歷史對話的類別
+    public class LogEntry {
+        public string CharacterName { get; set; } = "";
+        public string Text { get; set; } = "";
     }
 
     private List<DialogueLine> script = new();
@@ -238,6 +304,16 @@
         {
             Console.WriteLine($"讀取劇本失敗: {ex.Message}");
             script = new List<DialogueLine> { new DialogueLine { CharacterName = "Error", Text = "無法讀取劇本檔案 (data/script.json)。" } };
+        }
+    }
+
+    // 新增：切換顯示/隱藏 Log 視窗
+    private void ToggleLog()
+    {
+        // 只有在遊玩狀態且文字已經打完（或沒有選項）時才能開 Log
+        if (currentState == GameMode.Playing && !isTyping)
+        {
+            showLog = !showLog;
         }
     }
 
@@ -286,12 +362,12 @@
         }
 
         try {
-            // 存檔時同時記錄當下的 LineId
             var data = new SaveData { 
                 CurrentIndex = index, 
                 LineId = currentLine.Id,
                 SaveTime = DateTime.Now, 
-                Thumbnail = thumb 
+                Thumbnail = thumb,
+                SavedLog = historyLog.ToList() // 備份目前的 Log 狀態
             };
             await JSRuntime.InvokeVoidAsync("localStorage.setItem", storageKey, JsonSerializer.Serialize(data));
             await RefreshSaveCache();
@@ -300,7 +376,6 @@
 
     private async Task ExecuteLoad(string cacheKey) {
         if (cachedSaves.TryGetValue(cacheKey, out var data)) {
-            // 讀檔邏輯：優先依靠 LineId 找尋正確劇本位置
             int targetIndex = data.CurrentIndex;
             if (!string.IsNullOrEmpty(data.LineId)) {
                 var foundIndex = script.FindIndex(s => s.Id == data.LineId);
@@ -309,7 +384,12 @@
 
             index = targetIndex;
             displayedText = currentLine.Text;
+            
+            // 讀取存檔時，一併還原歷史對話紀錄
+            historyLog = data.SavedLog ?? new List<LogEntry>();
+            
             isTyping = false;
+            showLog = false; // 讀檔後確保 Log 視窗是關閉的
             currentState = GameMode.Playing;
         }
     }
@@ -352,42 +432,52 @@
     private SaveData? GetSlotData(int slot, bool isQuick) => cachedSaves.GetValueOrDefault($"{(isQuick ? "Quick" : "Normal")}_{slot}");
     private bool HasData(int slot, bool isQuick) => cachedSaves.ContainsKey($"{(isQuick ? "Quick" : "Normal")}_{slot}");
 
-    private async Task StartNewGame() { index = 0; currentState = GameMode.Playing; await TypeCurrentLine(); }
+    private async Task StartNewGame() { 
+        index = 0; 
+        historyLog.Clear(); // 新遊戲清空紀錄
+        showLog = false;
+        currentState = GameMode.Playing; 
+        await TypeCurrentLine(); 
+    }
     private void BackToMenu() => currentState = GameMode.MainMenu;
     private void SwitchState(GameMode s) { previousState = currentState; currentState = s; }
 
-    // 更新：全域點擊邏輯，防止在顯示選項時被點擊推進
     private async Task HandleGlobalClick() {
-        if (currentState != GameMode.Playing) return;
+        if (currentState != GameMode.Playing || showLog) return; // 如果打開了 Log，點擊背景無效
         
         if (isTyping) {
             cts?.Cancel(); 
         }
         else {
-            // 如果這句話有選項，強迫玩家點擊按鈕，點擊螢幕無效
             if (currentLine.Choices != null && currentLine.Choices.Any()) return;
-
             GoToNextLine(currentLine.NextId);
         }
     }
 
-    // 新增：處理按鈕點擊後的跳轉
-    private void MakeChoice(string targetId) {
-        GoToNextLine(targetId);
+    // 更新：處理選項點擊，把玩家選的內容也塞進 Log 裡面
+    private void MakeChoice(Choice choice) {
+        // 將玩家的選擇記錄到 Log 中
+        historyLog.Add(new LogEntry { CharacterName = "指揮官 (你)", Text = $"[{choice.Text}]" });
+        GoToNextLine(choice.TargetId);
     }
 
-    // 新增：尋找下一句對白的邏輯
     private void GoToNextLine(string targetId) {
+        // 在進入下一句之前，把「現在」這句話存進 Log 裡
+        if (!string.IsNullOrWhiteSpace(currentLine.Text) && string.IsNullOrEmpty(currentLine.CharacterName) == false)
+        {
+            historyLog.Add(new LogEntry { CharacterName = currentLine.CharacterName, Text = currentLine.Text });
+            // 避免 Log 太長吃記憶體，最多保留 100 句
+            if (historyLog.Count > 100) historyLog.RemoveAt(0);
+        }
+
         if (!string.IsNullOrEmpty(targetId)) {
-            // 如果有指定 ID，就在劇本裡尋找那一行
             var nextIndex = script.FindIndex(l => l.Id == targetId);
             if (nextIndex != -1) {
                 index = nextIndex;
             } else {
-                index++; // 找不到就強制往下 (防呆)
+                index++;
             }
         } else {
-            // 沒有指定 ID，照順序往下讀
             index++;
         }
 
