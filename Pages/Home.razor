@@ -7,12 +7,12 @@
 @inject IJSRuntime JSRuntime
 @inject HttpClient Http
 
-@* 視覺小說主控畫布 - 動態背景與破圖修復版
+@* 視覺小說主控畫布 - 多重立繪與排版修復版
    更新內容：
-   1. 移除寫死的 img 標籤，解決找不到圖片時的破圖 icon 問題。
-   2. 主選單改用 CSS 漸層背景。
-   3. 支援由 script.json 控制的 BackgroundImage，並支援切換時的淡入動畫。
-   4. SaveData 新增 CurrentBgImage，讓讀檔時能正確還原背景。
+   1. 新增 spriteLeft, spriteCenter, spriteRight 三個變數，支援三人同台。
+   2. 支援 "clear_all" 和 "none" 指令來退場。
+   3. 修改 CSS 動畫邏輯，改用 absolute position 和 margin-bottom 浮現，解決瞬間位移問題。
+   4. 存檔系統新增存取左、中、右三個立繪的狀態。
 *@
 
 <div class="vn-container" @onclick="HandleGlobalClick" style="height: 100vh; background: #000; color: white; user-select: none; position: relative; overflow: hidden; font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;">
@@ -20,14 +20,13 @@
     @if (currentState == GameMode.MainMenu)
     {
         <div class="main-menu" style="position: absolute; top:0; left:0; width:100%; height:100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
-            <!-- 主選單：改用純 CSS 漸層取代缺失的圖片，解決破圖問題 -->
             <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #001133 0%, #000000 100%); z-index: -1;"></div>
             
             <div class="title-section" style="text-align: center; margin-bottom: 50px; z-index: 2;">
                 <h1 style="font-size: 4rem; color: #00ffcc; text-shadow: 0 0 20px rgba(0,255,204,0.5); letter-spacing: 10px;">
                     宇宙邊緣的腳本家
                 </h1>
-                <p style="color: #888; letter-spacing: 3px;">Project MyCSharpVN - Dynamic Background</p>
+                <p style="color: #888; letter-spacing: 3px;">Project MyCSharpVN - Advanced Sprite System</p>
             </div>
             <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px; width: 300px; z-index: 2;">
                 <button class="btn-menu" @onclick="StartNewGame" @onclick:stopPropagation>開始遊戲</button>
@@ -45,18 +44,23 @@
             <div class="bg-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, #001122, #000); z-index: 0;">
                 @if (!string.IsNullOrEmpty(currentBgImage))
                 {
-                    <!-- 加入 @key 強制 Blazor 在圖片網址改變時重新渲染，以觸發 fadeIn 動畫 -->
                     <img @key="currentBgImage" src="@currentBgImage" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; animation: fadeInBg 1s ease-in-out;" />
                 }
             </div>
             
-            <!-- 立繪層 (Sprites Layer) -->
-            <div class="sprite-container" style="position: absolute; bottom: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; justify-content: center; align-items: flex-end;">
-                @if (!string.IsNullOrEmpty(currentLine.CharacterSprite))
+            <!-- 多重立繪層 (Sprites Layer) -->
+            <div class="sprite-wrapper">
+                @if (!string.IsNullOrEmpty(spriteLeft))
                 {
-                    <img src="@currentLine.CharacterSprite" 
-                         class="character-sprite @currentLine.SpritePos.ToString().ToLower()"
-                         style="max-height: 85vh; width: auto; transition: all 0.5s ease; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));" />
+                    <img @key="spriteLeft" src="@spriteLeft" class="sprite-img pos-left" />
+                }
+                @if (!string.IsNullOrEmpty(spriteCenter))
+                {
+                    <img @key="spriteCenter" src="@spriteCenter" class="sprite-img pos-center" />
+                }
+                @if (!string.IsNullOrEmpty(spriteRight))
+                {
+                    <img @key="spriteRight" src="@spriteRight" class="sprite-img pos-right" />
                 }
             </div>
 
@@ -172,6 +176,26 @@
         to { opacity: 1; }
     }
 
+    /* 多重立繪的絕對定位與動畫修復 */
+    .sprite-wrapper { position: absolute; bottom: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+    .sprite-img { 
+        position: absolute; 
+        bottom: 0; 
+        max-height: 85vh; 
+        width: auto; 
+        filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); 
+        animation: fadeInSprite 0.5s ease-out; 
+    }
+    .pos-left { left: 5%; }
+    .pos-center { left: 50%; transform: translateX(-50%); }
+    .pos-right { right: 5%; }
+
+    /* 改用 margin-bottom 來做浮現動畫，避免與 translateX 衝突 */
+    @@keyframes fadeInSprite {
+        from { opacity: 0; margin-bottom: -30px; }
+        to { opacity: 1; margin-bottom: 0; }
+    }
+
     .btn-close { 
         background: rgba(255, 255, 255, 0.1); 
         border: 2px solid #888; 
@@ -193,16 +217,6 @@
         color: #ff3333; 
         transform: rotate(90deg) scale(1.1); 
         box-shadow: 0 0 15px rgba(255,51,51,0.5);
-    }
-
-    .character-sprite { animation: fadeInSprite 0.8s ease-out; }
-    .character-sprite.left { transform: translateX(-25%); }
-    .character-sprite.center { transform: translateX(0); }
-    .character-sprite.right { transform: translateX(25%); }
-
-    @@keyframes fadeInSprite {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
     }
 
     .btn-choice {
@@ -252,8 +266,12 @@
     private bool isViewingQuickSave = false;
     private bool showLog = false;
     
-    // 新增：記錄目前的背景圖，實現背景狀態繼承
     private string currentBgImage = "";
+
+    // 新增：三個槽位的常駐立繪變數
+    private string spriteLeft = "";
+    private string spriteCenter = "";
+    private string spriteRight = "";
 
     private List<LogEntry> historyLog = new();
     private int textSpeed = 40;
@@ -276,8 +294,6 @@
         public string Text { get; set; } = ""; 
         public string CharacterSprite { get; set; } = ""; 
         public SpritePos SpritePos { get; set; } = SpritePos.Center; 
-        
-        // 新增：背景圖路徑
         public string BackgroundImage { get; set; } = ""; 
         public List<Choice>? Choices { get; set; }
     }
@@ -288,9 +304,12 @@
         public DateTime SaveTime { get; set; } 
         public string Thumbnail { get; set; } = ""; 
         public List<LogEntry> SavedLog { get; set; } = new();
-        
-        // 新增：存檔時記錄當前背景
         public string CurrentBgImage { get; set; } = "";
+        
+        // 新增：存檔時保存場上三人的立繪狀態
+        public string SpriteLeft { get; set; } = "";
+        public string SpriteCenter { get; set; } = "";
+        public string SpriteRight { get; set; } = "";
     }
 
     public class LogEntry {
@@ -380,7 +399,11 @@
                 SaveTime = DateTime.Now, 
                 Thumbnail = thumb,
                 SavedLog = historyLog.ToList(),
-                CurrentBgImage = currentBgImage // 存檔時保存背景狀態
+                CurrentBgImage = currentBgImage,
+                // 保存三人的立繪
+                SpriteLeft = spriteLeft,
+                SpriteCenter = spriteCenter,
+                SpriteRight = spriteRight
             };
             await JSRuntime.InvokeVoidAsync("localStorage.setItem", storageKey, JsonSerializer.Serialize(data));
             await RefreshSaveCache();
@@ -399,17 +422,23 @@
             displayedText = currentLine.Text;
             
             historyLog = data.SavedLog ?? new List<LogEntry>();
-            currentBgImage = data.CurrentBgImage ?? ""; // 讀檔時還原背景狀態
+            currentBgImage = data.CurrentBgImage ?? ""; 
+            
+            // 讀檔時完美還原場上三個人的位置
+            spriteLeft = data.SpriteLeft ?? "";
+            spriteCenter = data.SpriteCenter ?? "";
+            spriteRight = data.SpriteRight ?? "";
             
             isTyping = false;
             showLog = false; 
             currentState = GameMode.Playing;
             
-            // 讀檔時，檢查當下這一句是否有強制指定新背景
             if (!string.IsNullOrEmpty(currentLine.BackgroundImage))
             {
                 currentBgImage = currentLine.BackgroundImage;
             }
+            
+            UpdateSpritesFromCurrentLine();
         }
     }
 
@@ -454,7 +483,13 @@
     private async Task StartNewGame() { 
         index = 0; 
         historyLog.Clear(); 
-        currentBgImage = ""; // 新遊戲重置背景
+        currentBgImage = ""; 
+        
+        // 新遊戲清空場上所有人
+        spriteLeft = "";
+        spriteCenter = "";
+        spriteRight = "";
+        
         showLog = false;
         currentState = GameMode.Playing; 
         await TypeCurrentLine(); 
@@ -505,12 +540,43 @@
         }
     }
 
+    // 新增：處理立繪狀態繼承的核心邏輯
+    private void UpdateSpritesFromCurrentLine()
+    {
+        string newSprite = currentLine.CharacterSprite;
+
+        if (newSprite == "clear_all")
+        {
+            // 清空場上所有人
+            spriteLeft = "";
+            spriteCenter = "";
+            spriteRight = "";
+        }
+        else if (newSprite == "none")
+        {
+            // 清除指定位置的人
+            if (currentLine.SpritePos == SpritePos.Left) spriteLeft = "";
+            else if (currentLine.SpritePos == SpritePos.Center) spriteCenter = "";
+            else if (currentLine.SpritePos == SpritePos.Right) spriteRight = "";
+        }
+        else if (!string.IsNullOrEmpty(newSprite))
+        {
+            // 更新指定位置的人（如果該位置原本有人，就會直接被覆蓋替換）
+            if (currentLine.SpritePos == SpritePos.Left) spriteLeft = newSprite;
+            else if (currentLine.SpritePos == SpritePos.Center) spriteCenter = newSprite;
+            else if (currentLine.SpritePos == SpritePos.Right) spriteRight = newSprite;
+        }
+        // 如果 newSprite 是空字串 ""，則什麼都不做，保留場上原有的人
+    }
+
     private async Task TypeCurrentLine() {
-        // 更新背景圖片邏輯 (如果該句有指定，就切換，否則沿用上一句)
         if (!string.IsNullOrEmpty(currentLine.BackgroundImage))
         {
             currentBgImage = currentLine.BackgroundImage;
         }
+
+        // 更新場上的立繪狀態
+        UpdateSpritesFromCurrentLine();
 
         string fullText = currentLine.Text;
         displayedText = ""; isTyping = true;
