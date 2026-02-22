@@ -5,7 +5,7 @@
     "Text": "正在載入動態背景核心 10.0... (破圖問題已修復)",
     "CharacterSprite": "",
     "SpritePos": "Center",
-    "BackgroundImage": ""
+    "BackgroundImage": "images/bg_forest.webp"
   },
   {
     "Id": "scene1",
@@ -31,7 +31,7 @@
     "Text": "森林裡的樹木非常茂密，視線有些不佳，請跟緊我。",
     "CharacterSprite": "images/sprite_ai_normal.webp",
     "SpritePos": "Left",
-    "BackgroundImage": "",
+    "BackgroundImage": "images/bg_ruins.webp",
     "NextId": "end_scene"
   },
   {
@@ -40,7 +40,7 @@
     "Text": "廢墟中可能藏有舊時代的危險遺物，我們小心前進吧。",
     "CharacterSprite": "images/sprite_ai_normal.webp",
     "SpritePos": "Right",
-    "BackgroundImage": "",
+    "BackgroundImage": "images/bg_ruins.webp",
     "NextId": "end_scene"
   },
   {
