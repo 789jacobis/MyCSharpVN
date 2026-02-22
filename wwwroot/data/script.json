@@ -2,9 +2,10 @@
   {
     "Id": "start",
     "CharacterName": "系統",
-    "Text": "正在載入選項分歧核心 9.0...",
+    "Text": "正在載入動態背景核心 10.0... (破圖問題已修復)",
     "CharacterSprite": "",
-    "SpritePos": "Center"
+    "SpritePos": "Center",
+    "BackgroundImage": ""
   },
   {
     "Id": "scene1",
@@ -12,6 +13,7 @@
     "Text": "指揮官，前面出現了岔路，我們該往哪邊走？",
     "CharacterSprite": "images/sprite_ai_normal.webp",
     "SpritePos": "Center",
+    "BackgroundImage": "",
     "Choices": [
       {
         "Text": "往左邊的森林前進",
@@ -29,6 +31,7 @@
     "Text": "森林裡的樹木非常茂密，視線有些不佳，請跟緊我。",
     "CharacterSprite": "images/sprite_ai_normal.webp",
     "SpritePos": "Left",
+    "BackgroundImage": "",
     "NextId": "end_scene"
   },
   {
@@ -37,11 +40,12 @@
     "Text": "廢墟中可能藏有舊時代的危險遺物，我們小心前進吧。",
     "CharacterSprite": "images/sprite_ai_normal.webp",
     "SpritePos": "Right",
+    "BackgroundImage": "",
     "NextId": "end_scene"
   },
   {
     "Id": "end_scene",
     "CharacterName": "系統",
-    "Text": "分歧路線測試結束。這就是選項系統的威力！"
+    "Text": "動態背景與分歧路線測試結束。現在引擎已經非常完整了！"
   }
 ]
