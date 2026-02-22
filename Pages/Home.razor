@@ -43,7 +43,7 @@
                 @if (!string.IsNullOrEmpty(currentLine.CharacterSprite))
                 {
                     <img src="@currentLine.CharacterSprite" 
-                         class="character-sprite @currentLine.SpritePosition.ToString().ToLower()"
+                         class="character-sprite @currentLine.SpritePos.ToString().ToLower()"
                          style="max-height: 85vh; width: auto; transition: all 0.5s ease; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));" />
                 }
             </div>
