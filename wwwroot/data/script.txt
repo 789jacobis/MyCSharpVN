@@ -1,0 +1,210 @@
+// ==========================================
+// 📖 腳本語法小抄 (以 // 開頭的文字是註解，遊戲不會顯示)
+//
+// 1. 一般對話： 名字：對白內容
+// 2. 切換背景： [背景] 圖片路徑
+// 3. 顯示立繪： [立繪] 位置(左/中/右) 圖片路徑
+// 4. 清除立繪： [立繪] 左 none (單獨清除左邊) 或 [清場] (全部清除)
+// 5. 選項分歧： [選項] 選項文字 -> 跳轉ID
+// 6. 設定ID：   # ID名稱 (放在對白上方)
+// ==========================================
+
+第一幕
+
+[清場]
+[背景] images/bg_black.webp
+旁白：【第一幕：遊戲開始】一切的開端，隱藏於黑暗之中。
+
+第二幕
+
+[清場]
+[背景] images/bg_bedroom.webp
+旁白：【第二幕】陽光灑落，嶄新的一天開始了。
+[立繪] 中 images/sprite_metis.webp
+蜜媞絲：早安！今天的天氣看起來真不錯呢。
+[立繪] 右 images/sprite_cynthia.webp
+辛西亞：是啊，我們該準備出發了。
+
+第三幕
+
+[清場]
+[背景] images/bg_atelier.webp
+旁白：【第三幕】空氣中瀰漫著藥劑與金屬的氣味。
+神秘人A：材料都準備好了嗎？
+神秘人B：是的，隨時可以開始。
+神秘人C：千萬別出差錯了。
+神秘人D：放心交給我吧。
+[立繪] 左 images/sprite_serena.webp
+賽琳娜：看來這裡比想像中還要熱鬧。
+[立繪] 右 images/sprite_rui.webp
+瑠依：大家提高警覺，情況不明。
+[立繪] 左 images/sprite_saria.webp
+莎里亞：我已經準備好隨時支援了。
+[立繪] 右 images/sprite_cora.webp
+柯菈：別大意，這裡的機關可不少。
+[立繪] 左 images/sprite_blade13.webp
+刃十三：只要有威脅，我會立刻斬斷。
+[清場]
+？？？：呵呵，沒想到你們能找到這裡來。
+艾克蘭：你到底是誰？有什麼目的！
+
+第四幕
+
+[清場]
+[背景] images/bg_black.webp
+旁白：【第四幕】四周再次陷入一片漆黑。
+
+第五幕
+
+[清場]
+[背景] images/bg_church.webp
+旁白：【第五幕】莊嚴的鐘聲迴盪在空曠的大廳。
+艾克蘭：這裡就是傳說中的教堂嗎？
+[立繪] 左 images/sprite_serena.webp
+賽琳娜：氣氛讓人感到有些不自在。
+[立繪] 右 images/sprite_cora.webp
+柯菈：我們最好別亂碰任何東西。
+[立繪] 中 images/sprite_blade13.webp
+刃十三：我感覺到暗處有視線在盯著我們。
+
+第六幕
+
+[清場]
+[背景] images/bg_black.webp
+旁白：【第六幕】短暫的黑暗遮蔽了視線。
+
+第七幕
+
+[清場]
+[背景] images/bg_atelier.webp
+旁白：【第七幕】視線恢復，我們來到了煉金工房。
+艾克蘭：剛才那到底是怎麼回事？
+[立繪] 左 images/sprite_serena.webp
+賽琳娜：似乎是某種空間轉移的魔法。
+[立繪] 右 images/sprite_rui.webp
+瑠依：幸好大家都平安無事。
+[立繪] 左 images/sprite_saria.webp
+莎里亞：不過，我們好像被困在這裡了。
+[立繪] 右 images/sprite_cora.webp
+柯菈：大門被鎖死了，打不開。
+[立繪] 左 images/sprite_blade13.webp
+刃十三：要我強行破壞它嗎？
+[立繪] 右 images/sprite_cynthia.webp
+辛西亞：等等，暴力可能觸發其他陷阱。
+[清場]
+艾克蘭：讓我想想...一定有什麼解開的辦法。
+
+第八幕
+
+[清場]
+[背景] images/bg_black.webp
+旁白：【第八幕】意識再度被黑暗吞噬。
+
+第九幕
+
+[清場]
+[背景] images/bg_palace.webp
+旁白：【第九幕】金碧輝煌的大殿，象徵著無上的權力。
+艾克蘭：沒想到我們能走到這一步。
+[立繪] 左 images/sprite_serena.webp
+賽琳娜：保持肅靜，這裡不是可以隨便說話的地方。
+[立繪] 右 images/sprite_rui.webp
+瑠依：明白，我會注意禮節的。
+[立繪] 左 images/sprite_saria.webp
+莎里亞：不知道陛下會對我們說些什麼。
+[立繪] 右 images/sprite_cora.webp
+柯菈：總覺得氣氛非常沉重...
+[立繪] 左 images/sprite_blade13.webp
+刃十三：若有變故，我會保護大家撤退。
+[清場]
+[立繪] 中 images/sprite_medor.webp
+梅鐸兒：歡迎各位來到皇宮。
+[立繪] 左 images/sprite_chizuru.webp
+千鶴：陛下已經在裡面等候多時了。
+[立繪] 右 images/sprite_fnevia.webp
+芙妮維亞：請隨我來吧，各位貴賓。
+[立繪] 中 images/sprite_sara.webp
+薩拉：希望你們帶來的消息不會讓人失望。
+
+第十幕
+
+[清場]
+[背景] images/bg_palace.webp
+[立繪] 中 images/sprite_sara.webp
+薩拉：【第十幕】那麼，請開始你們的報告。
+[清場]
+旁白：一場決定帝國未來的對話即將展開。
+艾克蘭：事情是這樣的，我們在邊境發現了...
+[立繪] 左 images/sprite_serena.webp
+賽琳娜：並且找到了這份關鍵的文件。
+[立繪] 右 images/sprite_cora.webp
+柯菈：上面的印記證實了我們的猜測。
+[立繪] 左 images/sprite_cynthia.webp
+辛西亞：如果不盡快採取行動，後果不堪設想。
+[立繪] 右 images/sprite_rui.webp
+瑠依：這就是我們目前掌握的所有情報。
+
+第十一幕
+
+[清場]
+[背景] images/bg_tunnel.webp
+旁白：【第十一幕】陰暗潮濕的地下通道，充滿了未知。
+艾克蘭：這條密道真的安全嗎？
+[立繪] 左 images/sprite_cynthia.webp
+辛西亞：這是唯一的捷徑了，只能硬著頭皮走。
+[立繪] 右 images/sprite_sara.webp
+薩拉：跟緊我，這裡我比較熟。
+
+第十二幕
+
+[清場]
+[背景] images/bg_white_space.webp
+旁白：【第十二幕】耀眼的光芒過後，是一片虛無的純白。
+艾克蘭：這裡是哪裡？我們怎麼會在這裡？
+[立繪] 左 images/sprite_metis.webp
+蜜媞絲：好像是精神領域之類的空間...
+[立繪] 右 images/sprite_cynthia.webp
+辛西亞：我們必須找到出口，不能被困在這裡。
+
+第十三幕
+
+[清場]
+[背景] images/bg_palace.webp
+旁白：【第十三幕】幻象破滅，眾人竟然又回到了皇宮。
+艾克蘭：又回來了？這到底是怎麼回事...
+[立繪] 左 images/sprite_metis.webp
+蜜媞絲：看來剛才的一切都只是一場考驗。
+[立繪] 右 images/sprite_serena.webp
+賽琳娜：真是讓人捏了一把冷汗。
+[立繪] 左 images/sprite_cora.webp
+柯菈：我的腿都快軟了...
+[立繪] 右 images/sprite_cynthia.webp
+辛西亞：至少我們都平安無事。
+[立繪] 左 images/sprite_rui.webp
+瑠依：這下總算可以鬆一口氣了。
+
+第十四幕
+
+[清場]
+[背景] images/bg_laboratory.webp
+旁白：【第十四幕】各種精密的儀器在房間內閃爍著微光。
+[立繪] 左 images/sprite_metis.webp
+蜜媞絲：這裡的設備真先進，是用來做什麼的？
+[清場]
+艾克蘭：或許這裡藏著我們要找的最終答案。
+[立繪] 右 images/sprite_cynthia.webp
+辛西亞：我們快點調查一下周圍吧。
+
+第十五幕
+
+[清場]
+[背景] images/bg_street.webp
+旁白：【第十五幕】繁華的街道上，人群熙來攘往。
+[立繪] 左 images/sprite_metis.webp
+蜜媞絲：終於呼吸到外面的空氣了，真舒服！
+[清場]
+艾克蘭：是啊，感覺一切就像是一場夢。
+[立繪] 右 images/sprite_cynthia.webp
+辛西亞：我們的旅程，才正要開始呢。
+[清場]
+民女A：哎呀，這不是拯救了城市的大英雄們嗎！
