@@ -7,11 +7,12 @@
 @inject IJSRuntime JSRuntime
 @inject HttpClient Http
 
-@* 視覺小說主控畫布 - 歷史對話紀錄 (Log) & UI 修復版
+@* 視覺小說主控畫布 - 動態背景與破圖修復版
    更新內容：
-   1. 新增 historyLog 串列，記錄玩家看過的對白。
-   2. 實作 Log 介面與對話框上的 Log 按鈕。
-   3. 強化 SaveLoad 頁面右上角 .btn-close 按鈕的能見度。
+   1. 移除寫死的 img 標籤，解決找不到圖片時的破圖 icon 問題。
+   2. 主選單改用 CSS 漸層背景。
+   3. 支援由 script.json 控制的 BackgroundImage，並支援切換時的淡入動畫。
+   4. SaveData 新增 CurrentBgImage，讓讀檔時能正確還原背景。
 *@
 
 <div class="vn-container" @onclick="HandleGlobalClick" style="height: 100vh; background: #000; color: white; user-select: none; position: relative; overflow: hidden; font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;">
@@ -19,13 +20,14 @@
     @if (currentState == GameMode.MainMenu)
     {
         <div class="main-menu" style="position: absolute; top:0; left:0; width:100%; height:100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
-            <img src="images/bg_main_menu.webp" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6; z-index: -1;" />
+            <!-- 主選單：改用純 CSS 漸層取代缺失的圖片，解決破圖問題 -->
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #001133 0%, #000000 100%); z-index: -1;"></div>
             
             <div class="title-section" style="text-align: center; margin-bottom: 50px; z-index: 2;">
                 <h1 style="font-size: 4rem; color: #00ffcc; text-shadow: 0 0 20px rgba(0,255,204,0.5); letter-spacing: 10px;">
                     宇宙邊緣的腳本家
                 </h1>
-                <p style="color: #888; letter-spacing: 3px;">Project MyCSharpVN - History Log</p>
+                <p style="color: #888; letter-spacing: 3px;">Project MyCSharpVN - Dynamic Background</p>
             </div>
             <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px; width: 300px; z-index: 2;">
                 <button class="btn-menu" @onclick="StartNewGame" @onclick:stopPropagation>開始遊戲</button>
@@ -37,10 +39,16 @@
     }
     else if (currentState == GameMode.Playing)
     {
-        <div class="game-view capture-target" style="height: 100%; width: 100%; position: relative; background-color: #001133;">
-            <!-- 背景圖層 -->
-            <img src="images/bg_spaceship_bridge.webp" 
-                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 1; z-index: 0;" />
+        <div class="game-view capture-target" style="height: 100%; width: 100%; position: relative; background-color: #000;">
+            
+            <!-- 動態背景圖層 -->
+            <div class="bg-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, #001122, #000); z-index: 0;">
+                @if (!string.IsNullOrEmpty(currentBgImage))
+                {
+                    <!-- 加入 @key 強制 Blazor 在圖片網址改變時重新渲染，以觸發 fadeIn 動畫 -->
+                    <img @key="currentBgImage" src="@currentBgImage" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; animation: fadeInBg 1s ease-in-out;" />
+                }
+            </div>
             
             <!-- 立繪層 (Sprites Layer) -->
             <div class="sprite-container" style="position: absolute; bottom: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: flex; justify-content: center; align-items: flex-end;">
@@ -95,7 +103,6 @@
                 <div class="dialogue-box" style="position: absolute; bottom: 50px; left: 5%; width: 90%; border: 3px solid #00ffcc; padding: 25px; background-color: rgba(10, 10, 10, 0.95); border-radius: 10px; min-height: 160px; z-index: 99;">
                     
                     <div class="game-hud" style="position: absolute; top: -35px; right: 0; display: flex; gap: 5px; z-index: 100;">
-                        <!-- 新增 Log 按鈕 -->
                         <button class="btn-hud" @onclick="ToggleLog" @onclick:stopPropagation>Log</button>
                         <button class="btn-hud" @onclick="() => OpenSaveLoadInGame(true, false)" @onclick:stopPropagation>Save</button>
                         <button class="btn-hud" @onclick="PerformQuickSave" @onclick:stopPropagation>Q.Save</button>
@@ -134,7 +141,6 @@
                     <button class="tab-btn @(!isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = false">NORMAL</button>
                     <button class="tab-btn @(isViewingQuickSave ? "active" : "")" @onclick="() => isViewingQuickSave = true">QUICK</button>
                 </div>
-                <!-- 修復：強化關閉按鈕的樣式 -->
                 <button class="btn-close" style="position: absolute; right: 0;" @onclick="CloseSubPage">✕</button>
             </div>
             <div class="save-grid custom-scrollbar" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; flex-grow: 1; overflow-y: auto; overflow-x: hidden; padding: 20px;">
@@ -160,7 +166,12 @@
 </div>
 
 <style>
-    /* 關閉按鈕強化樣式 */
+    /* 背景淡入特效 */
+    @@keyframes fadeInBg {
+        from { opacity: 0.3; }
+        to { opacity: 1; }
+    }
+
     .btn-close { 
         background: rgba(255, 255, 255, 0.1); 
         border: 2px solid #888; 
@@ -184,7 +195,6 @@
         box-shadow: 0 0 15px rgba(255,51,51,0.5);
     }
 
-    /* 其他原有的樣式 */
     .character-sprite { animation: fadeInSprite 0.8s ease-out; }
     .character-sprite.left { transform: translateX(-25%); }
     .character-sprite.center { transform: translateX(0); }
@@ -240,12 +250,12 @@
     private GameMode previousState = GameMode.MainMenu;
     private bool isSaveMode = false;
     private bool isViewingQuickSave = false;
-
-    // 新增：控制 Log 視窗的顯示狀態
     private bool showLog = false;
-    // 新增：儲存對話歷史紀錄的串列
-    private List<LogEntry> historyLog = new();
+    
+    // 新增：記錄目前的背景圖，實現背景狀態繼承
+    private string currentBgImage = "";
 
+    private List<LogEntry> historyLog = new();
     private int textSpeed = 40;
     private int index = 0;
     private string displayedText = "";
@@ -266,6 +276,9 @@
         public string Text { get; set; } = ""; 
         public string CharacterSprite { get; set; } = ""; 
         public SpritePos SpritePos { get; set; } = SpritePos.Center; 
+        
+        // 新增：背景圖路徑
+        public string BackgroundImage { get; set; } = ""; 
         public List<Choice>? Choices { get; set; }
     }
 
@@ -274,11 +287,12 @@
         public string LineId { get; set; } = "";
         public DateTime SaveTime { get; set; } 
         public string Thumbnail { get; set; } = ""; 
-        // 為了完美讀檔，存檔時也把看過的 Log 存起來
         public List<LogEntry> SavedLog { get; set; } = new();
+        
+        // 新增：存檔時記錄當前背景
+        public string CurrentBgImage { get; set; } = "";
     }
 
-    // 新增：用於記錄每一筆歷史對話的類別
     public class LogEntry {
         public string CharacterName { get; set; } = "";
         public string Text { get; set; } = "";
@@ -307,10 +321,8 @@
         }
     }
 
-    // 新增：切換顯示/隱藏 Log 視窗
     private void ToggleLog()
     {
-        // 只有在遊玩狀態且文字已經打完（或沒有選項）時才能開 Log
         if (currentState == GameMode.Playing && !isTyping)
         {
             showLog = !showLog;
@@ -367,7 +379,8 @@
                 LineId = currentLine.Id,
                 SaveTime = DateTime.Now, 
                 Thumbnail = thumb,
-                SavedLog = historyLog.ToList() // 備份目前的 Log 狀態
+                SavedLog = historyLog.ToList(),
+                CurrentBgImage = currentBgImage // 存檔時保存背景狀態
             };
             await JSRuntime.InvokeVoidAsync("localStorage.setItem", storageKey, JsonSerializer.Serialize(data));
             await RefreshSaveCache();
@@ -385,12 +398,18 @@
             index = targetIndex;
             displayedText = currentLine.Text;
             
-            // 讀取存檔時，一併還原歷史對話紀錄
             historyLog = data.SavedLog ?? new List<LogEntry>();
+            currentBgImage = data.CurrentBgImage ?? ""; // 讀檔時還原背景狀態
             
             isTyping = false;
-            showLog = false; // 讀檔後確保 Log 視窗是關閉的
+            showLog = false; 
             currentState = GameMode.Playing;
+            
+            // 讀檔時，檢查當下這一句是否有強制指定新背景
+            if (!string.IsNullOrEmpty(currentLine.BackgroundImage))
+            {
+                currentBgImage = currentLine.BackgroundImage;
+            }
         }
     }
 
@@ -434,16 +453,18 @@
 
     private async Task StartNewGame() { 
         index = 0; 
-        historyLog.Clear(); // 新遊戲清空紀錄
+        historyLog.Clear(); 
+        currentBgImage = ""; // 新遊戲重置背景
         showLog = false;
         currentState = GameMode.Playing; 
         await TypeCurrentLine(); 
     }
+    
     private void BackToMenu() => currentState = GameMode.MainMenu;
     private void SwitchState(GameMode s) { previousState = currentState; currentState = s; }
 
     private async Task HandleGlobalClick() {
-        if (currentState != GameMode.Playing || showLog) return; // 如果打開了 Log，點擊背景無效
+        if (currentState != GameMode.Playing || showLog) return;
         
         if (isTyping) {
             cts?.Cancel(); 
@@ -454,19 +475,15 @@
         }
     }
 
-    // 更新：處理選項點擊，把玩家選的內容也塞進 Log 裡面
     private void MakeChoice(Choice choice) {
-        // 將玩家的選擇記錄到 Log 中
         historyLog.Add(new LogEntry { CharacterName = "指揮官 (你)", Text = $"[{choice.Text}]" });
         GoToNextLine(choice.TargetId);
     }
 
     private void GoToNextLine(string targetId) {
-        // 在進入下一句之前，把「現在」這句話存進 Log 裡
         if (!string.IsNullOrWhiteSpace(currentLine.Text) && string.IsNullOrEmpty(currentLine.CharacterName) == false)
         {
             historyLog.Add(new LogEntry { CharacterName = currentLine.CharacterName, Text = currentLine.Text });
-            // 避免 Log 太長吃記憶體，最多保留 100 句
             if (historyLog.Count > 100) historyLog.RemoveAt(0);
         }
 
@@ -489,6 +506,12 @@
     }
 
     private async Task TypeCurrentLine() {
+        // 更新背景圖片邏輯 (如果該句有指定，就切換，否則沿用上一句)
+        if (!string.IsNullOrEmpty(currentLine.BackgroundImage))
+        {
+            currentBgImage = currentLine.BackgroundImage;
+        }
+
         string fullText = currentLine.Text;
         displayedText = ""; isTyping = true;
         cts?.Cancel(); cts = new();
