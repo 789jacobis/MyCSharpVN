@@ -1,30 +1,47 @@
 [
   {
+    "Id": "start",
     "CharacterName": "系統",
-    "Text": "正在載入外部劇本核心 8.0...",
+    "Text": "正在載入選項分歧核心 9.0...",
     "CharacterSprite": "",
     "SpritePos": "Center"
   },
   {
+    "Id": "scene1",
     "CharacterName": "女騎士",
-    "Text": "指揮官，你來了。這段對白是從外部的 JSON 檔案讀取出來的喔！",
+    "Text": "指揮官，前面出現了岔路，我們該往哪邊走？",
     "CharacterSprite": "images/sprite_ai_normal.webp",
-    "SpritePos": "Center"
+    "SpritePos": "Center",
+    "Choices": [
+      {
+        "Text": "往左邊的森林前進",
+        "TargetId": "path_left"
+      },
+      {
+        "Text": "往右邊的廢墟探索",
+        "TargetId": "path_right"
+      }
+    ]
   },
   {
+    "Id": "path_left",
     "CharacterName": "女騎士",
-    "Text": "這樣以後你只要打開 data/script.json，就能無痛擴寫劇本了。",
+    "Text": "森林裡的樹木非常茂密，視線有些不佳，請跟緊我。",
     "CharacterSprite": "images/sprite_ai_normal.webp",
-    "SpritePos": "Left"
+    "SpritePos": "Left",
+    "NextId": "end_scene"
   },
   {
+    "Id": "path_right",
     "CharacterName": "女騎士",
-    "Text": "接下來，就算劇本寫到一萬行，核心程式碼依然會保持乾淨！",
+    "Text": "廢墟中可能藏有舊時代的危險遺物，我們小心前進吧。",
     "CharacterSprite": "images/sprite_ai_normal.webp",
-    "SpritePos": "Right"
+    "SpritePos": "Right",
+    "NextId": "end_scene"
   },
   {
+    "Id": "end_scene",
     "CharacterName": "系統",
-    "Text": "外部腳本讀取測試結束，接下來可以準備實作「選項分歧」系統了。"
+    "Text": "分歧路線測試結束。這就是選項系統的威力！"
   }
 ]
