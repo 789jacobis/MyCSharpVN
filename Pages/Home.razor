@@ -6,11 +6,10 @@
 @inject IJSRuntime JSRuntime
 @inject HttpClient Http
 
-@* 視覺小說主控畫布 - 純文字腳本 (TXT Parser) 版
+@* 視覺小說主控畫布 - 純文字腳本 (TXT Parser) 版 & 防當機修復
    更新內容：
-   1. 移除 JSON 讀取，改為讀取 data/script.txt 並由 ParseScript 解析全中文標籤。
-   2. 劇本模型 (DialogueLine) 直接快照每個時刻的背景與三位立繪狀態。
-   3. 簡化存檔系統，只需存 Index 即可完美還原所有場景狀態。
+   1. 修復立繪同圖路徑衝突崩潰：在 img 的 @key 加上位置前綴 (L_, C_, R_)。
+   2. 修復 NextId 屬性缺失的編譯錯誤 (GoToNextLine 改傳空字串)。
 *@
 
 <div class="vn-container" @onclick="HandleGlobalClick" style="height: 100vh; background: #000; color: white; user-select: none; position: relative; overflow: hidden; font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;">
@@ -24,7 +23,7 @@
                 <h1 style="font-size: 4rem; color: #00ffcc; text-shadow: 0 0 20px rgba(0,255,204,0.5); letter-spacing: 10px;">
                     宇宙邊緣的腳本家
                 </h1>
-                <p style="color: #888; letter-spacing: 3px;">Project MyCSharpVN - TXT Engine</p>
+                <p style="color: #888; letter-spacing: 3px;">Project MyCSharpVN - Stable TXT Engine</p>
             </div>
             <div class="menu-buttons" style="display: flex; flex-direction: column; gap: 12px; width: 300px; z-index: 2;">
                 <button class="btn-menu" @onclick="StartNewGame" @onclick:stopPropagation>開始遊戲</button>
@@ -46,19 +45,19 @@
                 }
             </div>
             
-            <!-- 多重立繪層 -->
+            <!-- 多重立繪層：加入 L_, C_, R_ 前綴防止相同的圖片造成 Blazor 崩潰 -->
             <div class="sprite-wrapper">
                 @if (!string.IsNullOrEmpty(spriteLeft))
                 {
-                    <img @key="spriteLeft" src="@spriteLeft" class="sprite-img pos-left" />
+                    <img @key="@("L_" + spriteLeft)" src="@spriteLeft" class="sprite-img pos-left" />
                 }
                 @if (!string.IsNullOrEmpty(spriteCenter))
                 {
-                    <img @key="spriteCenter" src="@spriteCenter" class="sprite-img pos-center" />
+                    <img @key="@("C_" + spriteCenter)" src="@spriteCenter" class="sprite-img pos-center" />
                 }
                 @if (!string.IsNullOrEmpty(spriteRight))
                 {
-                    <img @key="spriteRight" src="@spriteRight" class="sprite-img pos-right" />
+                    <img @key="@("R_" + spriteRight)" src="@spriteRight" class="sprite-img pos-right" />
                 }
             </div>
 
@@ -471,6 +470,7 @@
         if (isTyping) { cts?.Cancel(); }
         else {
             if (currentLine.Choices != null && currentLine.Choices.Any()) return;
+            // 修復 CS1061: 直接給予空字串，往下一行執行
             GoToNextLine("");
         }
     }
