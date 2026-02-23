@@ -25,18 +25,13 @@
 [立繪] 右 images/sprite_cynthia.webp
 辛西亞：是啊，我們該準備出發了。
 [立繪] 左 images/sprite_serena.webp
-賽琳娜：我是出現在左邊的測試人員。
-[立繪] 中 images/sprite_medor.webp
-梅鐸兒：我是替換中間的測試人員。
-[立繪] 右 images/sprite_saria.webp
-莎里亞：我是再次替換右邊的人。
-[立繪] 左 images/sprite_cora.webp
-柯菈：我是再次替換左邊的人。
-[立繪] 中 images/sprite_blade13.webp
-刃十三：我是再次替換中間的人。
-[清場]
-？？？：所有人員都被我消除了！。
-艾克蘭：本大爺登場了！
+賽琳娜：別急著走，等等我啊！
+[立繪] 右 images/sprite_metis.webp
+蜜媞絲：我要移動到右邊去！
+[立繪] 左 images/sprite_cynthia.webp
+辛西亞：那我移動到左邊去！。
+[立繪] 左 images/sprite_serena.webp
+賽琳娜：這樣我們會打架吧？
 
 第三幕
 
