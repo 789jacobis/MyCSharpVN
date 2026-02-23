@@ -24,6 +24,10 @@
 蜜媞絲：早安！今天的天氣看起來真不錯呢。
 [立繪] 右 images/sprite_cynthia.webp
 辛西亞：是啊，我們該準備出發了。
+[立繪] 左 images/sprite_serena.webp
+賽琳娜：我是出現在左邊的測試人員。
+[立繪] 中 images/sprite_medor.webp
+梅鐸兒：我是替換中間的測試人員。
 
 第三幕
 
